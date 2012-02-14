@@ -66,4 +66,57 @@ class Paypal::PaymentsPro < Paypal::Api
 
 	}
 
+	set_request_signature :do_reference_transaction, {
+		:method => "DoReferenceTransaction",
+		:reference_id => String,
+		:payment_action => Optional.new(Enum.new("Authorization", "Sale")),
+		:return_mf_details => Optional.new(
+			Coerce.new( lambda do |val|
+				return [1, "1", true].include?(val) ? 1 : 0
+			end)
+		),
+		:soft_descriptor =>Optional.new(lambda {|val|
+			if val.match(/^([a-z0-9]|\.|-|\*| )*$/i) && val.length <= 22
+				return true
+			else
+				return false
+			end
+		}),
+
+		# ship to address fields
+		:ship_to_name => Optional.new(String), # max 32
+		:ship_to_street => Optional.new(String), # max 100
+		:ship_to_street_2 => Optional.new(String), # max 100
+		:ship_to_city => Optional.new(String), # max 40
+		:ship_to_state => Optional.new(String), # max 40
+		:ship_to_zip => Optional.new(String), # max 20
+		:ship_to_country => Optional.new(String), # max 2
+		:ship_to_phone_num => Optional.new(/[0-9+-]+/), # max 20
+
+		# payment details fields
+		:amt => /[0-9,]{1,6}\.[0-9]{2}/,
+		:currency_code => Default.new("USD", /^[a-z]{3}$/i),
+
+		# TODO:
+		:item_amt => Optional.new,
+		:shipping_amt => Optional.new,
+		:insurance_amt => Optional.new,
+		:shipdisc_amt => Optional.new,
+		:handling_amt => Optional.new,
+		:tax_amt => Optional.new,
+
+		:desc => Optional.new(String), # max 127 char
+		:custom => Optional.new(String), # max 256 char
+		:inv_num => Optional.new(String), # max 127 char
+		:button_source => Optional.new(String), # max 32 char
+
+		:notify_url => Optional.new, # hard to tell if this is part of this api or not from the wording in the docs
+		:recurring => Default.new("N", lambda {|anything| "Y" }),
+
+		:item => Sequential.new({
+				:l_item_category => Enum.new("Digital", "Physical")
+			})
+
+	}
+
 end

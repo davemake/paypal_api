@@ -1,4 +1,15 @@
 module Paypal
+	module Formatters
+		def escape_uri_component(string)
+			string = string.to_s
+			return URI.escape(string, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
+		end
+
+		def to_key(symbol)
+			return symbol.to_s.gsub(/[^a-z0-9]/i, "").upcase
+		end
+	end
+
 	class Api
 
 		attr_accessor :request
@@ -35,6 +46,59 @@ module Paypal
 					raise InvalidParameter
 				end
 			end
+		end
+
+		class Sequential < Parameter
+			include Paypal::Formatters
+
+			attr_accessor :list
+
+			def to_key(symbol)
+				return symbol.to_s.split("_", 2).map{|s| s.gsub("_", "") }.join("_").gsub(/[^a-z0-9_]/i, "").upcase
+			end
+
+			def initialize(hash = {})
+				@list = []
+				@schema = hash
+				@required = hash.map{|(k,v)| k if v.class != Optional }.compact
+			end
+
+			def push(hash)
+				raise Paypal::InvalidParameter unless (@required - hash.keys).empty?
+
+				hash.each do |k,val|
+					type = @schema[k]
+
+					if type.nil?
+						hash[k] = val
+					elsif type.class == Regexp
+						if match = type.match(val)
+							hash[k] = match[0]
+						else
+							raise InvalidParameter
+						end
+					elsif [Optional, Enum, Coerce, Default].include?(type.class)
+						hash[k] = type.parse(val)
+					elsif type.class == Proc && type.call(val)
+						hash[k] = val
+					elsif type == val.class
+						hash[k] = val
+					else
+						raise Paypal::InvalidParameter
+					end
+				end
+
+				@list.push(hash)
+			end
+
+			def to_s
+				@list.inject(["", 0]) do |(acc, count), item|
+					[acc + item.inject("") do |acc2, (k,v)|
+						"#{acc2}&#{to_key(k)}#{count}=#{escape_uri_component(item[k])}"
+					end, count + 1]
+				end
+			end
+
 		end
 
 		class Default < Parameter
@@ -157,9 +221,26 @@ module Paypal
 				end
 			end
 
+			def self.set_sequential_reader(klass, k, v)
+				variable = "@#{k}"
+
+				klass.class_eval do
+					define_method(k) do
+						instance_variable_set(variable, v) unless instance_variable_defined?(variable)
+						instance_variable_get(variable)
+					end
+				end
+			end
+
 			def self.set_required(klass, keys)
 				klass.class_eval do
 					class_variable_set("@@required", keys)
+				end
+			end
+
+			def self.set_sequential(klass, keys)
+				klass.class_eval do
+					class_variable_set("@@sequential", keys)
 				end
 			end
 
@@ -177,18 +258,23 @@ module Paypal
 
 				# add setters/getters
 				required = []
+				sequential = []
 				hash.each do |k,v|
 					if v.class == String || v.class == Fixnum || v.class == Float
 						set_reader klass, k, v, true
+					elsif v.class == Sequential
+						set_sequential_reader klass, k, v
 					else
 						set_accessor klass, k, v
 					end
 
-					required.push(k) unless v.class == Optional
+					required.push(k) unless v.class == Optional || v.class == Sequential
+					sequential.push(k) if v.class == Sequential
 				end
 
 				# set which keys are required for the request
 				set_required(klass, required)
+				set_sequential(klass, sequential)
 
 				# create api method
 				self.class_eval <<-EOS

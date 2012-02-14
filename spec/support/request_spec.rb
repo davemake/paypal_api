@@ -20,7 +20,8 @@ describe Paypal::Request do
 					:string => String,
 					:fixnum => Fixnum,
 					:default => @api::Default.new("tamp", Fixnum),
-					:enum => @api::Enum.new("One", "Two")
+					:enum => @api::Enum.new("One", "Two"),
+					:sequential => @api::Sequential.new({:l_string => String, :l_fixnum => Fixnum, :l_set_category => Optional.new(String)})
 				}
 			end
 
@@ -29,6 +30,8 @@ describe Paypal::Request do
 				:fixnum => 23,
 				:enum => :one
 			})
+
+			@request.sequential.push({:l_string => "tamp", :l_fixnum => 2323})
 
 			@string = @request.request_string
 		end
@@ -54,6 +57,28 @@ describe Paypal::Request do
 
 		it "should have required keys set" do
 			@request.required_keys.should eq([:test_field, :string, :fixnum, :default, :enum])
+		end
+
+		it "should include sequential stuff in the request string" do
+			@string.should include("L_STRING0")
+			@string.should include("L_FIXNUM0")
+		end
+
+		it "should return a well formed url" do
+			parsed = nil
+			expect {
+				parsed = URI.parse(@string)
+			}.to_not raise_exception
+
+			parsed.query.should include("TESTFIELD")
+			parsed.query.should include("L_STRING0")
+
+			hash = nil
+			expect {
+				hash = CGI.parse parsed.query
+			}.to_not raise_exception
+
+			hash.keys.should include("L_STRING0")
 		end
 
 		it "should look for a config file if we're in rails"

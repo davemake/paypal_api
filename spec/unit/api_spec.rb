@@ -23,7 +23,8 @@ describe Paypal::Api do
 						:string => String,
 						:fixnum => Fixnum,
 						:default => @api::Default.new("tamp", Fixnum),
-						:enum => @api::Enum.new("one", "two")
+						:enum => @api::Enum.new("one", "two"),
+						:sequential => @api::Sequential.new({:l_string => String, :l_fixnum => Fixnum, :l_set_category => Optional.new(String)})
 					}
 				end
 			end
@@ -69,6 +70,26 @@ describe Paypal::Api do
 			describe "setters" do
 				before do
 					@request = Test.tester
+				end
+
+				it "should handle sequential types" do
+					@request.sequential.push({:l_string => "sasdf", :l_fixnum => 23, :l_set_category => "asdfasdf"})
+
+					@request.sequentials_string.should include("sasdf")
+					@request.sequentials_string.should include("23")
+
+					@request.sequential.push({:l_string => "alf", :l_fixnum => 22})
+					@request.sequentials_string.should include("L_FIXNUM1")
+					@request.sequentials_string.should include("L_SETCATEGORY0")
+					@request.sequentials_string.should_not include("L_SETCATEGORY1")
+
+					expect {
+						@request.sequential.push({:l_string => "sass"})
+					}.to raise_exception Paypal::InvalidParameter
+
+					expect {
+						@request.sequential.push({:l_string => "sass", :l_fixnum => "string"})
+					}.to raise_exception Paypal::InvalidParameter
 				end
 
 				it "should handle types like String Fixnum and Float" do
@@ -147,6 +168,50 @@ describe Paypal::Api do
 
 				param.parse(23).should eq(0)
 				param.parse("adfa").should eq(0)
+			end
+		end
+
+		describe Paypal::Api::Sequential do
+			before do
+				class Test < @api
+					set_request_signature :tester, {
+						:sequential => @api::Sequential.new({:l_string => String, :l_fixnum => Fixnum, :l_set_category => Optional.new(String)})
+					}
+				end
+
+				@request = Test.tester
+				@request.sequential.push({:l_string => "sasdf", :l_fixnum => 23, :l_set_category => "asdfasdf"})
+
+
+				expect {
+					@request.sequential.push({:l_string => "sass"})
+				}.to raise_exception Paypal::InvalidParameter
+
+				expect {
+					@request.sequential.push({:l_string => "sass", :l_fixnum => "string"})
+				}.to raise_exception Paypal::InvalidParameter
+			end
+
+			it "should allow nestedly defined params" do
+				@request.sequentials_string.should include("sasdf")
+				@request.sequentials_string.should include("23")
+			end
+
+			it "should allow optional params" do
+				@request.sequential.push({:l_string => "alf", :l_fixnum => 22})
+				@request.sequentials_string.should_not include("L_SETCATEGORY1")
+			end
+
+			it "should number the items" do
+				@request.sequential.push({:l_string => "alf", :l_fixnum => 22})
+				@request.sequentials_string.should include("L_FIXNUM1")
+				@request.sequentials_string.should include("L_SETCATEGORY0")
+			end
+
+			it "should keep the first underscore" do
+				param = @api::Sequential.new({:l_test => String})
+				param.to_key(:l_test).should eq("L_TEST")
+				param.to_key(:l_set_category).should eq("L_SETCATEGORY")
 			end
 		end
 

@@ -10,6 +10,7 @@ class Paypal::Request
 	PAYPAL_ENDPOINT = PAYPAL_INFO["environment"] == "production" ? "https://api-3t.paypal.com/nvp" : "https://api-3t.sandbox.paypal.com/nvp"
 
 	@@required = []
+	@@sequential = []
 
 	attr_accessor :payload
 
@@ -31,8 +32,12 @@ class Paypal::Request
 			"&VERSION=#{PAYPAL_VERSION}"
 	end
 
+	def sequentials_string
+		@@sequential.map{|k| self.send(k).to_s }.join
+	end
+
 	def request_string
-		(@payload.keys | @@required).inject(paypal_endpoint_with_defaults) do |acc, key|
+		(@payload.keys | @@required).inject(paypal_endpoint_with_defaults + sequentials_string) do |acc, key|
 			"#{acc}&#{to_key(key)}=#{escape_uri_component(self.send(key))}"
 		end
 	end
@@ -76,14 +81,7 @@ class Paypal::Request
 			end
 		end
 
-		def escape_uri_component(string)
-			string = string.to_s
-			return URI.escape(string, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
-		end
-
-		def to_key(symbol)
-			return symbol.to_s.gsub(/[^a-z0-9]/i, "").upcase
-		end
+		include Paypal::Formatters
 
 		def params_fulfilled?
 			@@required.each do |method|
