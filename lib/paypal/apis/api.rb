@@ -3,18 +3,6 @@ module Paypal
 
 		attr_accessor :request
 
-		def self.emails_and_amounts(payouts)
-			return payouts.each_with_index.inject("") do |acc, (payout, i)|
-				# documentation doesn't agree as to whether or not there is a unique id field here
-				acc+"&L_EMAIL#{i}=#{escape_uri_component(payout.payee.email)}&L_AMT#{i}=#{escape_uri_component(payout.amount.round(2))}&L_UNIQUEID#{i}=#{escape_uri_component(payout.unique_id)}"
-			end
-		end
-
-		def self.escape_uri_component(string)
-			string = string.to_s
-			return URI.escape(string, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
-		end
-
 		class Parameter
 			attr_accessor :value
 
@@ -85,12 +73,17 @@ module Paypal
 			end
 
 			def parse(val)
-				# TODO: coerce between
-				if @allowed_values.include?(val)
-					return val
+				if @allowed_values.include?(normalize(val))
+					return normalize(val)
 				else
 					raise InvalidParameter
 				end
+			end
+
+			def normalize(val)
+				return val if val.class == String
+				return Paypal::Api.symbol_to_camel(val) if val.class == Symbol
+				return nil
 			end
 		end
 
@@ -110,10 +103,6 @@ module Paypal
 			def self.set_accessor(klass, name, type = nil)
 				set_reader(klass, name, type)
 				set_writer(klass, name, type)
-			end
-
-			def self.to_key(symbol)
-				return symbol.to_s.gsub(/[^a-z0-9]/i, "").upcase
 			end
 
 			# writers should validate before assigning value

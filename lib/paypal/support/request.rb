@@ -13,11 +13,15 @@ class Paypal::Request
 
 	attr_accessor :payload
 
-	def initialize(payload)
+	def initialize(payload = {})
 		@payload = payload
 		@payload.each do |k,v|
 			self.send("#{k}=", v)
 		end
+	end
+
+	def required_keys
+		@@required
 	end
 
 	def paypal_endpoint_with_defaults
@@ -28,8 +32,8 @@ class Paypal::Request
 	end
 
 	def request_string
-		@payload.inject(paypal_endpoint_with_defaults) do |acc, arr|
-			"#{acc}&#{escape_uri_component(arr[0])}=#{escape_uri_component(arr[1])}"
+		(@payload.keys | @@required).inject(paypal_endpoint_with_defaults) do |acc, key|
+			"#{acc}&#{to_key(key)}=#{escape_uri_component(self.send(key))}"
 		end
 	end
 
@@ -40,7 +44,6 @@ class Paypal::Request
 	end
 
 	def make(&block)
-		validate
 		params_fulfilled?
 		begin
 			response = nil
@@ -66,9 +69,25 @@ class Paypal::Request
 
 	private
 
+		def emails_and_amounts(payouts)
+			return payouts.each_with_index.inject("") do |acc, (payout, i)|
+				# documentation doesn't agree as to whether or not there is a unique id field here
+				acc+"&L_EMAIL#{i}=#{escape_uri_component(payout.payee.email)}&L_AMT#{i}=#{escape_uri_component(payout.amount.round(2))}&L_UNIQUEID#{i}=#{escape_uri_component(payout.unique_id)}"
+			end
+		end
+
+		def escape_uri_component(string)
+			string = string.to_s
+			return URI.escape(string, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
+		end
+
+		def to_key(symbol)
+			return symbol.to_s.gsub(/[^a-z0-9]/i, "").upcase
+		end
+
 		def params_fulfilled?
 			@@required.each do |method|
-				raise InvalidRequest if self.send(method).nil?
+				raise Paypal::InvalidRequest if self.send(method).nil?
 			end
 		end
 end

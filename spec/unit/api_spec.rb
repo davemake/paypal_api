@@ -59,8 +59,11 @@ describe Paypal::Api do
 				end
 			end
 
-			describe "when missing required fields" do
-				it "should raise an InvalidRequest error"
+			it "should raise an InvalidRequest error when missing required fields" do
+				request = Test.tester
+				expect {
+					request.make
+				}.to raise_exception(Paypal::InvalidRequest)
 			end
 
 			describe "setters" do
@@ -121,7 +124,17 @@ describe Paypal::Api do
 				}.to raise_exception(Paypal::InvalidParameter)
 			end
 
-			it "should coerce symbols to strings"
+			it "should coerce symbols to strings" do
+				param = @api::Enum.new("First", "Second", "ThirdThing")
+
+				param.parse(:first).should eq("First")
+				param.parse(:second).should eq("Second")
+				param.parse(:third_thing).should eq("ThirdThing")
+
+				expect {
+					param.parse(:anything_else)
+				}.to raise_exception(Paypal::InvalidParameter)
+			end
 		end
 
 		describe Paypal::Api::Coerce do
