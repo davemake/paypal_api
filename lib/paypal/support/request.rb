@@ -1,6 +1,11 @@
 class Paypal::Request
 
-	PAYPAL_INFO = YAML::load(File.open("#{Rails.root}/config/paypal_adaptive.yml"))[Rails.env]
+	if defined? Rails
+		PAYPAL_INFO = YAML::load(File.open("#{Rails.root}/config/paypal_adaptive.yml"))[Rails.env]
+	else
+		PAYPAL_INFO = {}
+	end
+
 	PAYPAL_VERSION = "2.3"
 	PAYPAL_ENDPOINT = PAYPAL_INFO["environment"] == "production" ? "https://api-3t.paypal.com/nvp" : "https://api-3t.sandbox.paypal.com/nvp"
 

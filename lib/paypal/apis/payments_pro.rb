@@ -4,12 +4,12 @@ class Paypal::PaymentsPro < Paypal::Api
 
 		# DoDirectPayment Request Fields
 		:method => "DoDirectPayment",
-		:paymentaction => Optional.new(Enum.new("Authorization", "Sale")),
-		:ipaddress =>	/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/,
-		:returnmfdetails => Optional.new(
+		:payment_action => Optional.new(Enum.new("Authorization", "Sale")),
+		:ip_address =>	/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/,
+		:return_mf_details => Optional.new(
 			Coerce.new( lambda do |val|
-				return [1, "1", true].include?(val) ? 1 : 0 }
-			)
+				return [1, "1", true].include?(val) ? 1 : 0
+			end)
 		),
 
 

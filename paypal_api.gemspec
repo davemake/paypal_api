@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.email       = ["matt.handler@gmail.com"]
   s.homepage    = ""
   s.summary     = %q{an interface to paypals api}
-  s.description = %q{TODO: Write a gem description}
+  s.description = %q{an interface to paypals api}
 
   s.rubyforge_project = "paypal_api"
 
