@@ -1,0 +1,69 @@
+class Paypal::PaymentsPro < Paypal::Api
+
+	set_request_signature :do_direct_payment, {
+
+		# DoDirectPayment Request Fields
+		:method => "DoDirectPayment",
+		:paymentaction => Optional.new(Enum.new("Authorization", "Sale")),
+		:ipaddress =>	/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/,
+		:returnmfdetails => Optional.new(
+			Coerce.new( lambda do |val|
+				return [1, "1", true].include?(val) ? 1 : 0 }
+			)
+		),
+
+
+		# Credit Card Details Fields
+		:credit_card_type => Optional.new(Enum.new("Visa", "MasterCard", "Discover", "Amex", "Maestro")),
+		:acct => /\d+/, # this should be better
+		:exp_date => /^\d{6}$/, # "MMYYYY"
+		:cvv2 => /^\d{3,4}$/,
+		:start_date => Optional.new(/^\d{6}$/), # maestro only
+		:issue_number => Optional.new(/^\d{,2}$/), #maestro only
+
+
+		# Payer Information Fields
+		:email => Optional.new(/email/), # max 127 char
+		:first_name => String, # max 25 char
+		:last_name => String, # max 25 char
+
+
+		# Address Fields
+		:street => String, # max 100 char
+		:street_2 => Optional.new(String), # max 100 char
+		:city => String, # max 40 char
+		:state => String, # max 40 char
+		:country_code => Default.new("US", /^[a-z]{2}$/i),
+		:zip => String, # max 20 char
+		:ship_to_phone_num => Optional.new(String), # max 20 char
+
+
+		# Payment Details Fields
+		:amt => /[0-9,]{1,6}\.[0-9]{2}/, # complicated: https://www.x.com/developers/paypal/documentation-tools/api/dodirectpayment-api-operation-nvp
+		:currency_code => Default.new("USD", /^[a-z]{3}$/i),
+
+		# TODO:
+		:item_amt => Optional.new,
+		:shipping_amt => Optional.new,
+		:insurance_amt => Optional.new,
+		:shipdisc_amt => Optional.new,
+		:handling_amt => Optional.new,
+		:tax_amt => Optional.new,
+
+		:desc => Optional.new(String), # max 127 char
+		:custom => Optional.new(String), # max 256 char
+		:inv_num => Optional.new(String), # max 127 char
+		:button_source => Optional.new(String), # max 32 char
+
+		:notify_url => Optional.new, # hard to tell if this is part of this api or not from the wording in the docs
+		:recurring => Default.new("N", lambda {|anything| "Y" }),
+
+
+		# TODO: Payment Details Item Fields
+		# TODO: Ebay Item Payment Details Item Fields
+		# TODO: Ship To Address Fields
+		# TODO: 3D Secure Request Fields (U.K. Merchants Only)
+
+	}
+
+end
