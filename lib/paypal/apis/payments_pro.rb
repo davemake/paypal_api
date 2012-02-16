@@ -39,7 +39,7 @@ class Paypal::PaymentsPro < Paypal::Api
 
 
 		# Payment Details Fields
-		:amt => /[0-9,]{1,6}\.[0-9]{2}/, # complicated: https://www.x.com/developers/paypal/documentation-tools/api/dodirectpayment-api-operation-nvp
+		:amt => Float, # complicated: https://www.x.com/developers/paypal/documentation-tools/api/dodirectpayment-api-operation-nvp
 		:currency_code => Default.new("USD", /^[a-z]{3}$/i),
 
 		# TODO:
@@ -69,7 +69,7 @@ class Paypal::PaymentsPro < Paypal::Api
 	set_request_signature :do_reference_transaction, {
 		:method => "DoReferenceTransaction",
 		:reference_id => String,
-		:payment_action => Optional.new(Enum.new("Authorization", "Sale")),
+		:payment_action => Default.new("Sale", Enum.new("Authorization", "Sale")),
 		:return_mf_details => Optional.new(
 			Coerce.new( lambda do |val|
 				return [1, "1", true].include?(val) ? 1 : 0
@@ -94,7 +94,7 @@ class Paypal::PaymentsPro < Paypal::Api
 		:ship_to_phone_num => Optional.new(/[0-9+-]+/), # max 20
 
 		# payment details fields
-		:amt => /[0-9,]{1,6}\.[0-9]{2}/,
+		:amt => Float,
 		:currency_code => Default.new("USD", /^[a-z]{3}$/i),
 
 		# TODO:

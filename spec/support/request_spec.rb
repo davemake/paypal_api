@@ -56,7 +56,7 @@ describe Paypal::Request do
 		end
 
 		it "should have required keys set" do
-			@request.required_keys.should eq([:test_field, :string, :fixnum, :default, :enum])
+			@request.class.required_keys.should eq([:test_field, :string, :fixnum, :default, :enum])
 		end
 
 		it "should include sequential stuff in the request string" do

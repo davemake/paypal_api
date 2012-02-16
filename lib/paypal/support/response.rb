@@ -1,15 +1,25 @@
 class Paypal::Response
 
+	attr_accessor :raw_response, :parsed_response
+
 	def initialize(stringio)
-		@parsed_response = CGI.parse(stringio.class == StringIO ? stringio.read : stringio)
+		@raw_response = stringio.class == StringIO ? stringio.read : stringio
+		@parsed_response = CGI.parse(@raw_response)
+
+		@success = @parsed_response["ACK"] == ["Success"]
+		# raise PaypalApiError if @parsed_response["ACK"] == "Failure"
 	end
 
-	def []=(key)
+	def [](key)
 		if key.class == Symbol
-			@parsed_response[symbol_to_key(key)]
+			@parsed_response[symbol_to_key(key)][0]
 		else
-			@parsed_response[key]
+			@parsed_response[key][0]
 		end
+	end
+
+	def success?
+		return @success
 	end
 
 	def method_missing?(key)
@@ -19,6 +29,6 @@ class Paypal::Response
 	private
 
 		def symbol_to_key(symbol)
-			return symbol.to_s.upcase
+			return symbol.to_s.gsub(/[^0-9a-z]/i, "").upcase
 		end
 end
