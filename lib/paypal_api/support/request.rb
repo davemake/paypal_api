@@ -1,7 +1,7 @@
 class Paypal::Request
 
 	if defined? Rails
-		PAYPAL_INFO = YAML::load(File.open("#{Rails.root}/config/paypal_adaptive.yml"))[Rails.env]
+		PAYPAL_INFO = YAML::load(File.open("#{Rails.root}/config/paypal.yml"))[Rails.env]
 	else
 		PAYPAL_INFO = {}
 	end
@@ -9,7 +9,7 @@ class Paypal::Request
 	PAYPAL_VERSION = "84.0"
 	PAYPAL_ENDPOINT = PAYPAL_INFO["environment"] == "production" ? "https://api-3t.paypal.com/nvp" : "https://api-3t.sandbox.paypal.com/nvp"
 
-	# class instance variables
+	# class instance variables (unique per subclass, not unique per instance)
 	# used for dynamically created request classes
 	@required = []
 	@sequential = []
