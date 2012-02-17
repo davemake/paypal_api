@@ -1,1 +1,1 @@
-require "paypal"
+require "paypal_api"

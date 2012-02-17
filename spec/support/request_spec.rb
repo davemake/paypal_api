@@ -52,7 +52,7 @@ describe Paypal::Request do
 		end
 
 		it "should use a paypal endpoint" do
-			@string.should include(Paypal::Request::PAYPAL_ENDPOINT)
+			@string.should include(".paypal.com/nvp")
 		end
 
 		it "should have required keys set" do

@@ -1,14 +1,9 @@
 module Paypal
 	class Request
 
-		if defined? Rails
-			PAYPAL_INFO = YAML::load(File.open(Rails.root.join("config", "paypal.yml")))[Rails.env]
-		else
-			PAYPAL_INFO = {}
-		end
-
 		PAYPAL_VERSION = "84.0"
-		PAYPAL_ENDPOINT = PAYPAL_INFO["environment"] == "production" ? "https://api-3t.paypal.com/nvp" : "https://api-3t.sandbox.paypal.com/nvp"
+		@@paypal_info = nil
+		@@paypal_endpoint = nil
 
 		# class instance variables (unique per subclass, not unique per instance)
 		# used for dynamically created request classes
@@ -18,6 +13,8 @@ module Paypal
 		attr_accessor :payload
 
 		def initialize(payload = {})
+			config
+
 			@payload = payload
 			@payload.each do |k,v|
 				self.send("#{k}=", v)
@@ -44,9 +41,9 @@ module Paypal
 		end
 
 		def paypal_endpoint_with_defaults
-			return "#{PAYPAL_ENDPOINT}?PWD=#{PAYPAL_INFO["password"]}" +
-				"&USER=#{PAYPAL_INFO["username"]}" +
-				"&SIGNATURE=#{PAYPAL_INFO["signature"]}" +
+			return "#{@@paypal_endpoint}?PWD=#{@@paypal_info["password"]}" +
+				"&USER=#{@@paypal_info["username"]}" +
+				"&SIGNATURE=#{@@paypal_info["signature"]}" +
 				"&VERSION=#{PAYPAL_VERSION}"
 		end
 
@@ -97,6 +94,17 @@ module Paypal
 		end
 
 		private
+
+			def config
+
+				return unless @@paypal_info.nil?
+
+				@@paypal_info = {}
+				@@paypal_info = YAML::load(File.open(Rails.root.join("config", "paypal.yml")))[Rails.env] if defined? Rails
+
+				@@paypal_endpoint = @@paypal_info["environment"] == "production" ? "https://api-3t.paypal.com/nvp" : "https://api-3t.sandbox.paypal.com/nvp"
+
+			end
 
 			include Paypal::Formatters
 
