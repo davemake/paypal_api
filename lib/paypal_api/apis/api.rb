@@ -33,7 +33,7 @@ module Paypal
 							if match = type.match(val)
 								instance_variable_set("@#{field}", match[0])
 							else
-								raise InvalidParameter
+								raise Paypal::InvalidParameter, "#{field} expects a string that matches #{type}"
 							end
 						elsif type.class == Optional
 							instance_variable_set("@#{field}", type.parse(val))
@@ -50,7 +50,7 @@ module Paypal
 						elsif type == val.class
 							instance_variable_set("@#{field}",val)
 						else
-							raise Paypal::InvalidParameter
+							raise Paypal::InvalidParameter, "#{field}'s spec was set incorrectly"
 						end
 					end
 				end
@@ -166,19 +166,19 @@ module Paypal
 					if val.class == @parameter
 						return val
 					else
-						raise InvalidParameter
+						raise Paypal::InvalidParameter, "#{val} is not of type #{val.class}"
 					end
 				elsif @parameter.class == Regexp
 					match = @parameter.match(val)
 					if match
 						return match[0]
 					else
-						raise InvalidParameter
+						raise Paypal::InvalidParameter, "#{val} does not match #{@parameter}"
 					end
 				elsif @parameter.class < Parameter
 					return @parameter.parse(val)
 				else
-					raise InvalidParameter
+					raise Paypal::InvalidParameter, "#{@parameter.class} is an invalid parameter specification"
 				end
 			end
 		end
@@ -199,7 +199,7 @@ module Paypal
 			end
 
 			def push(hash)
-				raise Paypal::InvalidParameter unless (@required - hash.keys).empty?
+				raise Paypal::InvalidParameter, "missing required parameter for sequential field" unless (@required - hash.keys).empty?
 
 				hash.each do |k,val|
 					type = @schema[k]
@@ -210,7 +210,7 @@ module Paypal
 						if match = type.match(val)
 							hash[k] = match[0]
 						else
-							raise InvalidParameter
+							raise Paypal::InvalidParameter, "#{val} did not match #{type}"
 						end
 					elsif [Optional, Enum, Coerce, Default].include?(type.class)
 						hash[k] = type.parse(val)
@@ -219,7 +219,7 @@ module Paypal
 					elsif type == val.class
 						hash[k] = val
 					else
-						raise Paypal::InvalidParameter
+						raise Paypal::InvalidParameter, "#{type.class} is an invalid parameter specification"
 					end
 				end
 
@@ -275,7 +275,7 @@ module Paypal
 				if @allowed_values.include?(normalize(val))
 					return normalize(val)
 				else
-					raise InvalidParameter
+					raise Paypal::InvalidParameter, "#{val} was not one of #{@allowed_values}"
 				end
 			end
 
