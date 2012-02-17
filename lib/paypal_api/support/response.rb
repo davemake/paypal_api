@@ -1,6 +1,6 @@
 class Paypal::Response
 
-	attr_accessor :raw_response, :parsed_response
+	attr_accessor :raw_response, :parsed_response, :error_message
 
 	def initialize(stringio)
 		@raw_response = stringio.class == StringIO ? stringio.read : stringio
