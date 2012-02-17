@@ -110,7 +110,7 @@ module Paypal
 
 			def params_fulfilled?
 				self.class.required_keys.each do |method|
-					raise Paypal::InvalidRequest if self.send(method).nil?
+					raise Paypal::InvalidRequest, "missing required field: #{method}" if self.send(method).nil?
 				end
 			end
 	end

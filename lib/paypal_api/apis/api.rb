@@ -166,14 +166,14 @@ module Paypal
 					if val.class == @parameter
 						return val
 					else
-						raise Paypal::InvalidParameter, "#{val} is not of type #{val.class}"
+						raise Paypal::InvalidParameter, "'#{val}'' is not of type #{@parameter.class}"
 					end
 				elsif @parameter.class == Regexp
 					match = @parameter.match(val)
 					if match
 						return match[0]
 					else
-						raise Paypal::InvalidParameter, "#{val} does not match #{@parameter}"
+						raise Paypal::InvalidParameter, "'#{val}' does not match #{@parameter}"
 					end
 				elsif @parameter.class < Parameter
 					return @parameter.parse(val)
@@ -210,7 +210,7 @@ module Paypal
 						if match = type.match(val)
 							hash[k] = match[0]
 						else
-							raise Paypal::InvalidParameter, "#{val} did not match #{type}"
+							raise Paypal::InvalidParameter, "'#{val}' did not match #{type}"
 						end
 					elsif [Optional, Enum, Coerce, Default].include?(type.class)
 						hash[k] = type.parse(val)
@@ -275,7 +275,7 @@ module Paypal
 				if @allowed_values.include?(normalize(val))
 					return normalize(val)
 				else
-					raise Paypal::InvalidParameter, "#{val} was not one of #{@allowed_values}"
+					raise Paypal::InvalidParameter, "'#{val}' was not one of #{@allowed_values}"
 				end
 			end
 
