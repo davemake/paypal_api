@@ -2,7 +2,7 @@ module Paypal
 	class Request
 
 		if defined? Rails
-			PAYPAL_INFO = YAML::load(File.open("#{Rails.root}/config/paypal.yml"))[Rails.env]
+			PAYPAL_INFO = YAML::load(File.open(Rails.root.join("config", "paypal.yml")))[Rails.env]
 		else
 			PAYPAL_INFO = {}
 		end
