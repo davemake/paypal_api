@@ -31,8 +31,8 @@ module Paypal
 			return @parsed_response[symbol_to_key(key)]
 		end
 
-		def code(code)
-			@@error_codes[code]
+		def error_field
+			@@error_codes[@error_code] ? @@human_readable[@@error_codes[@error_code]] : nil
 		end
 
 		private
@@ -56,5 +56,14 @@ class Paypal::Response
 		'10519' => :acct,
 		'10521' => :acct,
 		'10526' => :currency_code
+	}
+
+	@@human_readable = {
+		:acct => "credit card number",
+		:amt => "charge amount",
+		:exp_date => "expiration date",
+		:cvv2 => "security code",
+		:reference_id => "billing agreement",
+		:currency_code => "currency code"
 	}
 end
