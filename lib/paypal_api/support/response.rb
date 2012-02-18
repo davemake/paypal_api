@@ -1,14 +1,18 @@
 module Paypal
 	class Response
 
-		attr_accessor :raw_response, :parsed_response, :error_message
+		attr_accessor :raw_response, :parsed_response, :error_message, :error_code
 
 		def initialize(stringio)
 			@raw_response = stringio.class == StringIO ? stringio.read : stringio
 			@parsed_response = CGI.parse(@raw_response)
 
 			@success = @parsed_response["ACK"] == ["Success"]
-			# raise PaypalApiError if @parsed_response["ACK"] == "Failure"
+
+			unless @success
+				@error_message = @parsed_response["L_LONGMESSAGE0"][0]
+				@error_code = @parsed_response["L_ERRORCODE0"][0]
+			end
 		end
 
 		def [](key)
@@ -27,10 +31,30 @@ module Paypal
 			return @parsed_response[symbol_to_key(key)]
 		end
 
+		def code(code)
+			@@error_codes[code]
+		end
+
 		private
 
 			def symbol_to_key(symbol)
 				return symbol.to_s.gsub(/[^0-9a-z]/i, "").upcase
 			end
 	end
+end
+
+class Paypal::Response
+	@@error_codes = {
+		'10527' => :acct,
+		'10525' => :amt,
+		'10508' => :exp_date,
+		'10504' => :cvv2,
+		'10502' => :acct,
+		'10501' => :reference_id,
+		'10509' => :ip_address,
+		'10510' => :acct,
+		'10519' => :acct,
+		'10521' => :acct,
+		'10526' => :currency_code
+	}
 end
