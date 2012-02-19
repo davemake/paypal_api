@@ -31,6 +31,10 @@ module Paypal
 			return @parsed_response[symbol_to_key(key)]
 		end
 
+		def error_input
+			@@error_codes[@error_code]
+		end
+
 		def error_field
 			@@error_codes[@error_code] ? @@human_readable[@@error_codes[@error_code]] : nil
 		end
