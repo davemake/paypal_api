@@ -120,5 +120,31 @@ module Paypal
 
 		}
 
+		set_request_signature :do_capture, {
+			:method => "DoCapture",
+			:authorization_id => String, # max 19 char
+			:amt => Float,
+			:currency_code => Default.new("USD", /^[a-z]{3}$/i),
+			:complete_type => Default.new("Complete", Enum.new("Complete", "NotComplete")),
+			:inv_num => Optional.new(String), # max 127 char
+			:note => Optional.new(String), # max 255 char
+			:soft_descriptor => Optional.new(lambda {|val|
+				if val.match(/^([a-z0-9]|\.|-|\*| )*$/i) && val.length <= 22
+					return true
+				else
+					return false
+				end
+			}),
+
+			:store_id => Optional.new(String), # max 50 char
+			:terminal_id => Optional.new(String) # max 50 char
+		}
+
+		set_request_signature :do_void, {
+			:method => "DoVoid",
+			:authorization_id => String, # Note: If you are voiding a transaction that has been reauthorized, use the ID from the original authorization, and not the reauthorization.
+			:note => String # max 255 char
+		}
+
 	end
 end
