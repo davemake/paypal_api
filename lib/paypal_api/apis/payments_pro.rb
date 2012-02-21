@@ -146,5 +146,10 @@ module Paypal
 			:note => String # max 255 char
 		}
 
+		set_request_signature :get_recurring_payments_profile_details, {
+			:method => "GetRecurringPaymentsProfileDetails",
+			:profile_id => String # max 19 char
+		}
+
 	end
 end
