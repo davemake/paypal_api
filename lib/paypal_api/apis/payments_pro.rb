@@ -143,7 +143,7 @@ module Paypal
 		set_request_signature :do_void, {
 			:method => "DoVoid",
 			:authorization_id => String, # Note: If you are voiding a transaction that has been reauthorized, use the ID from the original authorization, and not the reauthorization.
-			:note => String # max 255 char
+			:note => Optional.new(String) # max 255 char
 		}
 
 		set_request_signature :get_recurring_payments_profile_details, {
