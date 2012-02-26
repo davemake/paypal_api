@@ -78,18 +78,20 @@ module Paypal
 
 				klass.class_eval do
 					define_method(k) do
-						instance_variable_set(variable, v) unless instance_variable_defined?(variable)
+						instance_variable_set(variable, v.clone) unless instance_variable_defined?(variable)
 						instance_variable_get(variable)
 					end
 				end
 			end
 
+			# collected from set request signature
 			def self.set_required(klass, keys)
 				klass.class_eval do
 					@required = keys
 				end
 			end
 
+			# collected from set request signature
 			def self.set_sequential(klass, keys)
 				klass.class_eval do
 					@sequential = keys
@@ -136,11 +138,12 @@ module Paypal
 				EOS
 			end
 
-			def set_response_signature(hash)
-				hash.each do |k,v|
-					set_reader k, v
-				end
-			end
+			# TODO: make this useful :'(
+			# def set_response_signature(hash)
+			# 	hash.each do |k,v|
+			# 		set_reader k, v
+			# 	end
+			# end
 	end
 
 end

@@ -51,9 +51,19 @@ module Paypal
 				@limit = limit
 			end
 
+			# necessary because sequential stores request state, need a new list created for each
+			# 	request instance
+			def clone
+				return self.class.new(@schema, @limit, @key_proc)
+			end
+
+			def length
+				return @list.length
+			end
+
 			def push(hash)
 				raise Paypal::InvalidParameter, "missing required parameter for sequential field" unless (@required - hash.keys).empty?
-				raise Paypal::InvalidParameter, "field cannot have more than #{@limit} items" if !@limit.nil? && @list.length == @limit
+				raise Paypal::InvalidParameter, "field cannot have more than #{@limit} items, #{@list.length} provided" if !@limit.nil? && @list.length == @limit
 
 				hash.each do |k,val|
 					type = @schema[k]
@@ -88,25 +98,12 @@ module Paypal
 				end
 			end
 
-			def to_s
+			def to_query_string
 				@list.inject(["", 0]) do |(acc, count), item|
 					[acc + item.inject("") do |acc2, (k,v)|
 						"#{acc2}&#{to_key(k, count)}=#{escape_uri_component(item[k])}"
 					end, count + 1]
 				end
-			end
-
-		end
-
-		class Default < Parameter
-
-			def initialize(value, parameter)
-				@value = value
-				@parameter = parameter
-			end
-
-			def parse(val)
-				return parameter_parse(val)
 			end
 
 		end
@@ -161,9 +158,15 @@ module Paypal
 			end
 		end
 
+		class Hash < Parameter
+
+		end
+
+		# Optional and Default can take other parameters as input
+
 		class Optional < Parameter
 			def initialize(parameter = nil)
-				@parameter = parameter
+				@parameter = parameter.is_a?(Sequential) ? parameter.clone : parameter
 			end
 
 			def parse(val)
@@ -171,7 +174,17 @@ module Paypal
 			end
 		end
 
-		class Hash < Parameter
+
+		class Default < Parameter
+
+			def initialize(value, parameter)
+				@value = value
+				@parameter = parameter.is_a?(Sequential) ? parameter.clone : parameter
+			end
+
+			def parse(val)
+				return parameter_parse(val)
+			end
 
 		end
 

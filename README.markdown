@@ -145,6 +145,8 @@ like to contribute, i've made it pretty easy to add compatibility for a new api 
 
 ## Mass Pay
 
+note that you need to request that paypal enable mass pay for your account before it will work
+
 * mass_pay - &#10003;
 
 ## Instant Pay Notifications
