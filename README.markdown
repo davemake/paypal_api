@@ -25,6 +25,12 @@ for interfacing with the gem, i am aiming for something like this:
 	request.last_name = "winton"
 	request.amt = 10.00
 
+	# add a "list" type field
+	request.item.push {
+		:l_email => "bro@dudeman.com",
+		:l_amt => 23.0
+	}
+
 	response = request.make
 
 for writing the api method request specs, look at lib/paypal_api/apis/payments_pro.rb
@@ -47,3 +53,9 @@ to store ipn messages, and a generated class with callbacks to handle the variou
 are many intricacies in the meanings of the different ipn's.
 
 this is my first gem, so i'll be excited for any contributions :'(
+
+# Paypal API Checklist
+
+here's a list of api methods, and whether or not they are implemented (please take a look at lib/paypal_api/apis/payments_pro.rb if you'd
+like to contribute, i've made it pretty easy to add compatibility for a new api call)
+
