@@ -151,5 +151,81 @@ module Paypal
 			:profile_id => String # max 19 char
 		}
 
+		set_request_signature :address_verify, {
+
+		}
+
+		set_request_signature :bill_outstanding_amount, {
+
+		}
+
+		set_request_signature :callback, {
+
+		}
+
+		set_request_signature :create_recurring_payments_profile, {
+
+		}
+
+		set_request_signature :do_authorization, {
+
+		}
+
+		set_request_signature :do_express_checkout_payment, {
+
+		}
+
+		set_request_signature :do_nonreferenced_credit, {
+
+		}
+
+		set_request_signature :do_reauthorization, {
+
+		}
+
+		set_request_signature :get_balance, {
+
+		}
+
+		set_request_signature :get_billing_agreement_customer_details, {
+
+		}
+
+		set_request_signature :get_express_checkout_details, {
+
+		}
+
+		set_request_signature :get_transaction_details, {
+
+		}
+
+		set_request_signature :manage_pending_transaction_status, {
+
+		}
+
+		set_request_signature :manage_recurring_payments_profile_status, {
+
+		}
+
+		set_request_signature :refund_transaction, {
+
+		}
+
+		set_request_signature :set_customer_billing_agreement, {
+
+		}
+
+		set_request_signature :set_express_checkout, {
+
+		}
+
+		set_request_signature :transaction_search, {
+
+		}
+
+		set_request_signature :update_recurring_payments_profile, {
+
+		}
+
 	end
 end
