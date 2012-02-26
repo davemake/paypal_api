@@ -1,6 +1,8 @@
 module Paypal
 	class Request
 
+		cattr_accessor :environment, :user, :pwd, :signature, :version
+
 		PAYPAL_VERSION = "84.0"
 		@@paypal_info = nil
 		@@paypal_endpoint = nil
@@ -39,9 +41,9 @@ module Paypal
 		end
 
 		def paypal_endpoint_with_defaults
-			return "#{@@paypal_endpoint}?PWD=#{@@paypal_info["password"]}" +
-				"&USER=#{@@paypal_info["username"]}" +
-				"&SIGNATURE=#{@@paypal_info["signature"]}" +
+			return "#{@@paypal_endpoint}?PWD=#{@@paypal_info["password"] || self.class.pwd}" +
+				"&USER=#{@@paypal_info["username"] || self.class.user}" +
+				"&SIGNATURE=#{@@paypal_info["signature"] || self.class.signature}" +
 				"&VERSION=#{PAYPAL_VERSION}"
 		end
 
@@ -98,13 +100,16 @@ module Paypal
 
 			def config
 
-				return unless @@paypal_info.nil?
-
 				@@paypal_info = {}
-				@@paypal_info = YAML.load(ERB.new(File.new(Rails.root.join("config", "paypal.yml")).read).result)[::Rails.env] if defined? ::Rails
 
-				@@paypal_endpoint = @@paypal_info["environment"] == "production" ? "https://api-3t.paypal.com/nvp" : "https://api-3t.sandbox.paypal.com/nvp"
+				@@paypal_info = get_info if Module.const_defined?("Rails")
 
+				@@paypal_endpoint = (@@paypal_info["environment"] == "production" || Paypal::Request.environment == "production") ? "https://api-3t.paypal.com/nvp" : "https://api-3t.sandbox.paypal.com/nvp"
+
+			end
+
+			def get_info
+				YAML.load(::ERB.new(File.new(Rails.root.join("config", "paypal.yml")).read).result)[Rails.env]
 			end
 
 			def params_fulfilled?

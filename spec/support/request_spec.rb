@@ -9,6 +9,51 @@ describe Paypal::Request do
 		URI.parse(url)
 	end
 
+	it "should allow you to set the environment" do
+		Paypal::Request.environment = "production"
+
+		Paypal::Request.new
+		Paypal::Request.class_variable_get("@@paypal_endpoint").should eq("https://api-3t.paypal.com/nvp")
+
+		Paypal::Request.environment = "development"
+
+		Paypal::Request.new
+		Paypal::Request.class_variable_get("@@paypal_endpoint").should eq("https://api-3t.sandbox.paypal.com/nvp")
+	end
+
+	it "should allow you to set the user pwd and signature"
+
+	it "should allow you to set the version"
+
+	describe "should look for a config file if we're in rails" do
+
+		describe "for production" do
+			before do
+				Module.should_receive(:const_defined?).and_return(true)
+
+				Paypal::Request.any_instance.should_receive(:get_info).and_return({"environment" => "production" })
+			end
+
+			it "should use the real server" do
+				Paypal::Request.new
+				Paypal::Request.class_variable_get("@@paypal_endpoint").should eq("https://api-3t.paypal.com/nvp")
+			end
+		end
+
+		describe "for anything else" do
+			before do
+				Paypal::Request.any_instance.stub(:get_info).and_return({
+							"production" => { "environment" => "development" }
+						})
+			end
+
+			it "should use the sandbox server" do
+				Paypal::Request.new
+				Paypal::Request.class_variable_get("@@paypal_endpoint").should eq("https://api-3t.sandbox.paypal.com/nvp")
+			end
+		end
+	end
+
 	context "when making requests" do
 		before do
 			@api = Paypal::Api
@@ -80,7 +125,5 @@ describe Paypal::Request do
 
 			hash.keys.should include("L_STRING0")
 		end
-
-		it "should look for a config file if we're in rails"
 	end
 end

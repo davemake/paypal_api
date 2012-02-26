@@ -91,8 +91,8 @@ describe Paypal::Api::Parameter do
 
 		it "should keep the first underscore" do
 			param = @api::Sequential.new({:l_test => String})
-			param.to_key(:l_test).should eq("L_TEST")
-			param.to_key(:l_set_category).should eq("L_SETCATEGORY")
+			param.to_key(:l_test, 0).should eq("L_TEST0")
+			param.to_key(:l_set_category, 1).should eq("L_SETCATEGORY1")
 		end
 
 		it "should allow a list length limit to be set"

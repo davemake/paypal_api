@@ -84,7 +84,7 @@ module Paypal
 				if @key_proc
 					return @key_proc.call(symbol, i)
 				else
-					return symbol.to_s.split("_", 2).map{|s| s.gsub("_", "") }.join("_").gsub(/[^a-z0-9_]/i, "").upcase + "#{count}"
+					return symbol.to_s.split("_", 2).map{|s| s.gsub("_", "") }.join("_").gsub(/[^a-z0-9_]/i, "").upcase + "#{i}"
 				end
 			end
 
