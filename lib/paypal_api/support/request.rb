@@ -12,7 +12,7 @@ module Paypal
 		@required = []
 		@sequential = []
 
-		attr_accessor :payload
+		attr_accessor :payload, :error_message
 
 		def initialize(payload = {})
 			config
@@ -26,8 +26,10 @@ module Paypal
 		def valid?
 			begin
 				params_fulfilled?
+				validate!
 				return true
 			rescue
+				@error_message = $!.message
 				return false
 			end
 		end
@@ -48,7 +50,7 @@ module Paypal
 		end
 
 		def sequentials_string
-			self.class.sequential_keys.map{|k| self.send(k).to_s }.join
+			self.class.sequential_keys.map{|k| self.send(k).to_query_string }.join
 		end
 
 		def request_string
@@ -62,17 +64,12 @@ module Paypal
 		def make_request
 			response = open(request_string)
 			return Paypal::Response.new(response)
-
-			# if response.kind_of? Net::HTTPSuccess
-			# 	puts response.read
-			# 	return Response.new(response)
-			# else
-			# 	raise StandardError
-			# end
 		end
 
 		def make(&block)
 			params_fulfilled?
+			validate!
+
 			begin
 				response = make_request
 
@@ -94,9 +91,14 @@ module Paypal
 			end
 		end
 
-		private
+		protected
 
 			include Paypal::Formatters
+
+			# override for custom request validation
+			def validate!
+				return true
+			end
 
 			def config
 
