@@ -34,7 +34,9 @@ methods and their associated spec.
 
 	response.success?
 ```
+
 ## configure
+
 ```ruby
 	Paypal::Request.version = "84.0"
 	Paypal::Request.environment = "development" # "production" will switch from the sandbox server to the real server
@@ -42,6 +44,7 @@ methods and their associated spec.
 	Paypal::Request.pwd = "some_password_they_gave_you"
 	Paypal::Request.signature = "some_signature"
 ```
+
 paypal api credentials for production can be found here: [https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature](https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature)
 
 sandbox credentials can be found here: [https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0](https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0)
@@ -49,7 +52,8 @@ sandbox credentials can be found here: [https://developer.paypal.com/cgi-bin/dev
 ## rails
 
 if you'd like to have multi environment configuration in rails, place a file at `config/paypal.yml` and the gem will read from it accordingly
-```yaml
+
+```yml
 	test:
 	  environment: "sandbox"
 	  username: "user_api1.something.com"
@@ -62,6 +66,7 @@ if you'd like to have multi environment configuration in rails, place a file at 
 	  password: <%= ENV["PAYPAL_PASSWORD"] %>
 	  signature: <%= ENV["PAYPAL_SIGNATURE"] %>
 ```
+
 # Current Status
 
 alpha
