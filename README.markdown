@@ -13,8 +13,8 @@ methods and their associated spec.
 
 # Usage
 
-for interfacing with the gem:
-
+## interfacing with the gem:
+```ruby
 	require "paypal_api"
 
 	request = Paypal::PaymentsPro.do_direct_payment # returns instance of Paypal::DoDirectPaymentRequest
@@ -33,9 +33,35 @@ for interfacing with the gem:
 	response = request.make
 
 	response.success?
+```
+## configure
+```ruby
+	Paypal::Request.version = "84.0"
+	Paypal::Request.environment = "development" # "production" will switch from the sandbox server to the real server
+	Paypal::Request.user = "user_api1.something.com"
+	Paypal::Request.pwd = "some_password_they_gave_you"
+	Paypal::Request.signature = "some_signature"
+```
+paypal api credentials for production can be found here: [https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature](https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature)
 
-for writing the api method request specs, look at lib/paypal_api/apis/payments_pro.rb
+sandbox credentials can be found here: [https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0](https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0)
 
+## rails
+
+if you'd like to have multi environment configuration in rails, place a file at `config/paypal.yml` and the gem will read from it accordingly
+```yaml
+	test:
+	  environment: "sandbox"
+	  username: "user_api1.something.com"
+	  password: "some_password_they_gave_you"
+	  signature: "some_signature"
+
+	production:
+	  environment: "production"
+	  username: <%= ENV["PAYPAL_USERNAME"] %>
+	  password: <%= ENV["PAYPAL_PASSWORD"] %>
+	  signature: <%= ENV["PAYPAL_SIGNATURE"] %>
+```
 # Current Status
 
 alpha
@@ -53,11 +79,13 @@ as this is my first gem, i could also use help with some of the niceties with ra
 to store ipn messages, and a generated class with callbacks to handle the various cases. this will probably take a lot of effort since there
 are many intricacies in the meanings of the different ipn's.
 
+for contributing to the api method request specs, look at `lib/paypal_api/apis/payments_pro.rb`
+
 this is my first gem, so i'll be excited for any contributions :'(
 
 # Paypal API Checklist
 
-here's a list of api methods, and whether or not they are implemented (please take a look at lib/paypal_api/apis/payments_pro.rb if you'd
+here's a list of api methods, and whether or not they are implemented (please take a look at `lib/paypal_api/apis/payments_pro.rb` if you'd
 like to contribute, i've made it pretty easy to add compatibility for a new api call)
 
 ## Payments Pro
