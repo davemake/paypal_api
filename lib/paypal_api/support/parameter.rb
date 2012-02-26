@@ -99,11 +99,13 @@ module Paypal
 			end
 
 			def to_query_string
-				@list.inject(["", 0]) do |(acc, count), item|
-					[acc + item.inject("") do |acc2, (k,v)|
-						"#{acc2}&#{to_key(k, count)}=#{escape_uri_component(item[k])}"
-					end, count + 1]
+				output = ""
+				@list.each_index do |i|
+					@list[i].each do |(k,v)|
+						output = "#{output}&#{to_key(k, i)}=#{escape_uri_component(@list[i][k])}"
+					end
 				end
+				return output
 			end
 
 		end

@@ -27,7 +27,7 @@ describe Paypal::MassPay do
 			end
 
 			it "should render the keys in the request properly" do
-				@request.request_string.should eq("https://api-3t.sandbox.paypal.com/nvp?PWD=&USER=&SIGNATURE=&VERSION=84.0&L_EMAIL0=mark%40suster.com&L_AMT0=10.231&METHOD=MassPay&CURRENCYCODE=USD&RECEIVERTYPE=EmailAddress")
+				@request.request_string.should include("&L_EMAIL0=mark%40suster.com&L_AMT0=10.23&METHOD=MassPay&CURRENCYCODE=USD&RECEIVERTYPE=EmailAddress")
 				expect {
 					URI.parse(@request.request_string)
 				}.to_not raise_exception
@@ -55,18 +55,29 @@ describe Paypal::MassPay do
 				}.to raise_exception(Paypal::InvalidParameter)
 			end
 
-			it "should make a valid request" do
+			it "should make a valid request", :slow_paypal => true do
 				response = nil
 				expect {
 					response = @request.make
 				}.to_not raise_exception Paypal::InvalidRequest
 
-				response.raw_response.should be_nil
+				response.raw_response.should_not be_nil
 				response.success?.should be_true
 			end
 
-			describe "when making the request" do
+			describe "with stubbed response" do
+				before(:each) do
+					Paypal::MassPayRequest.any_instance.stub(:make_request).and_return(Paypal::Response.new("TIMESTAMP=2012%2d02%2d26T23%3a19%3a06Z&CORRELATIONID=204a7348d3e11&ACK=Success&VERSION=84%2e0&BUILD=2571254"))
+				end
 
+				before(:each) do
+					@response = @request.make
+				end
+
+				it "should have a correlationid" do
+					@response[:correlation_id].should eq("204a7348d3e11")
+					@response.success?.should be_true
+				end
 			end
 		end
 	end
