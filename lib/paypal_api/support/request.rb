@@ -19,8 +19,6 @@ module Paypal
 			@payload.each do |k,v|
 				self.send("#{k}=", v)
 			end
-
-			# TODO: set cert and ssl stuff
 		end
 
 		def valid?
@@ -53,6 +51,7 @@ module Paypal
 
 		def request_string
 			(@payload.keys | self.class.required_keys).inject(paypal_endpoint_with_defaults + sequentials_string) do |acc, key|
+				# if key signature is hash or optional...
 				"#{acc}&#{to_key(key)}=#{escape_uri_component(self.send(key))}"
 			end
 		end
@@ -95,23 +94,25 @@ module Paypal
 
 		private
 
+			include Paypal::Formatters
+
 			def config
 
 				return unless @@paypal_info.nil?
 
 				@@paypal_info = {}
-				@@paypal_info = YAML::load(File.open(Rails.root.join("config", "paypal.yml")))[Rails.env] if defined? Rails
+				@@paypal_info = YAML.load(ERB.new(File.new(Rails.root.join("config", "paypal.yml")).read).result)[::Rails.env] if defined? ::Rails
 
 				@@paypal_endpoint = @@paypal_info["environment"] == "production" ? "https://api-3t.paypal.com/nvp" : "https://api-3t.sandbox.paypal.com/nvp"
 
 			end
 
-			include Paypal::Formatters
-
 			def params_fulfilled?
 				self.class.required_keys.each do |method|
 					raise Paypal::InvalidRequest, "missing required field: #{method}" if self.send(method).nil?
 				end
+
+				# TODO: check if sequential has been fulfilled
 			end
 	end
 end
