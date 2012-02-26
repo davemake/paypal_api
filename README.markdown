@@ -15,34 +15,34 @@ methods and their associated spec.
 
 ## interfacing with the gem:
 ```ruby
-	require "paypal_api"
+require "paypal_api"
 
-	request = Paypal::PaymentsPro.do_direct_payment # returns instance of Paypal::DoDirectPaymentRequest
+request = Paypal::PaymentsPro.do_direct_payment # returns instance of Paypal::DoDirectPaymentRequest
 
-	# set required fields
-	request.first_name = "mark"
-	request.last_name = "winton"
-	request.amt = 10.00
+# set required fields
+request.first_name = "mark"
+request.last_name = "winton"
+request.amt = 10.00
 
-	# add a list type field
-	request.item.push {
-		:l_email => "bro@dudeman.com",
-		:l_amt => 23.0
-	}
+# add a list type field
+request.item.push {
+	:l_email => "bro@dudeman.com",
+	:l_amt => 23.0
+}
 
-	response = request.make
+response = request.make
 
-	response.success?
+response.success?
 ```
 
 ## configure
 
 ```ruby
-	Paypal::Request.version = "84.0"
-	Paypal::Request.environment = "development" # "production" will switch from the sandbox server to the real server
-	Paypal::Request.user = "user_api1.something.com"
-	Paypal::Request.pwd = "some_password_they_gave_you"
-	Paypal::Request.signature = "some_signature"
+Paypal::Request.version = "84.0"
+Paypal::Request.environment = "development" # or "production"
+Paypal::Request.user = "user_api1.something.com"
+Paypal::Request.pwd = "some_password_they_gave_you"
+Paypal::Request.signature = "some_signature"
 ```
 
 paypal api credentials for production can be found here: [https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature](https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature)
@@ -54,17 +54,17 @@ sandbox credentials can be found here: [https://developer.paypal.com/cgi-bin/dev
 if you'd like to have multi environment configuration in rails, place a file at `config/paypal.yml` and the gem will read from it accordingly
 
 ```yml
-	test:
-	  environment: "sandbox"
-	  username: "user_api1.something.com"
-	  password: "some_password_they_gave_you"
-	  signature: "some_signature"
+test:
+  environment: "sandbox"
+  username: "user_api1.something.com"
+  password: "some_password_they_gave_you"
+  signature: "some_signature"
 
-	production:
-	  environment: "production"
-	  username: <%= ENV["PAYPAL_USERNAME"] %>
-	  password: <%= ENV["PAYPAL_PASSWORD"] %>
-	  signature: <%= ENV["PAYPAL_SIGNATURE"] %>
+production:
+  environment: "production"
+  username: <%= ENV["PAYPAL_USERNAME"] %>
+  password: <%= ENV["PAYPAL_PASSWORD"] %>
+  signature: <%= ENV["PAYPAL_SIGNATURE"] %>
 ```
 
 # Current Status
