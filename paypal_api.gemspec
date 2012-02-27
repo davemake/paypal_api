@@ -7,9 +7,9 @@ Gem::Specification.new do |s|
   s.version     = Paypal::VERSION
   s.authors     = ["Matt Handler"]
   s.email       = ["matt.handler@gmail.com"]
-  s.homepage    = ""
+  s.homepage    = "https://github.com/matthandlersux/paypal_api"
   s.summary     = %q{an interface to paypals api}
-  s.description = %q{an interface to paypals api}
+  s.description = %q{alpha - currently covers part of payments pro and all of mass pay}
 
   s.rubyforge_project = "paypal_api"
 
