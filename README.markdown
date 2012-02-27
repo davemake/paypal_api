@@ -20,8 +20,8 @@ request.amt = 10.00
 
 # Add a list type field
 request.item.push {
-	:l_email => "bro@dudeman.com",
-	:l_amt => 23.0
+	:email => "bro@dudeman.com",
+	:amt => 23.0
 }
 
 response = request.make
