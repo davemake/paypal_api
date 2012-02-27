@@ -5,26 +5,20 @@ a ruby library to handle the entire paypal api.
 paypals documentation sucks, and there do not appear to be any officially supported paypal gems.
 the gems that do exist do not cover the entire api.
 
-# Goal
-
-the goal is to organize interaction with paypals api into a standard. anyone who has looked at their documentation will notice
-it is not standardized in any way. the main effort i am pushing for is to have a nice DSL for specifying the various api
-methods and their associated spec.
-
 # Usage
 
-## interfacing with the gem:
+## Interfacing with the gem:
 ```ruby
 require "paypal_api"
 
 request = Paypal::PaymentsPro.do_direct_payment # returns instance of Paypal::DoDirectPaymentRequest
 
-# set required fields
+# Set required fields
 request.first_name = "mark"
 request.last_name = "winton"
 request.amt = 10.00
 
-# add a list type field
+# Add a list type field
 request.item.push {
 	:l_email => "bro@dudeman.com",
 	:l_amt => 23.0
@@ -32,10 +26,13 @@ request.item.push {
 
 response = request.make
 
-response.success?
+response.success? # true if successful
+
+response[:correlation_id] # correlation id string returned by paypal
+response[:transaction_id] # transaction id string, not return on all calls
 ```
 
-## configure
+## Configure
 
 ```ruby
 Paypal::Request.version = "84.0"
@@ -49,7 +46,7 @@ paypal api credentials for production can be found here: [https://www.paypal.com
 
 sandbox credentials can be found here: [https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0](https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0)
 
-## rails
+## Rails
 
 if you'd like to have multi environment configuration in rails, place a file at `config/paypal.yml` and the gem will read from it accordingly
 
