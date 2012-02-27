@@ -129,7 +129,7 @@ module Paypal
 			attr_reader :allowed_values
 
 			def initialize(*values)
-				if values.length == 1 && values[0].is_a?(Hash)
+				if values.length == 1 && values[0].is_a?(::Hash)
 					@hash_enum = true
 					@allowed_values = values[0]
 				else
@@ -142,7 +142,7 @@ module Paypal
 					if @allowed_values.include?(val)
 						return @allowed_values[val]
 					else
-						raise Paypal::InvalidParameter, "'#{val}' must be one of #{@allowed_values.keys}"
+						raise Paypal::InvalidParameter, "'#{val}' must be a key in #{@allowed_values.keys}"
 					end
 				else
 					if @allowed_values.include?(normalize(val))

@@ -21,9 +21,23 @@ describe Paypal::Request do
 		Paypal::Request.class_variable_get("@@paypal_endpoint").should eq("https://api-3t.sandbox.paypal.com/nvp")
 	end
 
-	it "should allow you to set the user pwd and signature"
+	it "should allow you to set the user pwd and signature" do
+		Paypal::Request.user = "asdf"
+		Paypal::Request.pwd = "zxcv"
+		Paypal::Request.signature = ";lkj"
 
-	it "should allow you to set the version"
+		request = Paypal::Request.new
+		request.request_string.should include("USER=asdf")
+		request.request_string.should include("PWD=zxcv")
+		request.request_string.should include("SIGNATURE=;lkj")
+	end
+
+	it "should allow you to set the version" do
+		Paypal::Request.version = "76.0"
+
+		request = Paypal::Request.new
+		request.request_string.should include("VERSION=76.0")
+	end
 
 	describe "should look for a config file if we're in rails" do
 

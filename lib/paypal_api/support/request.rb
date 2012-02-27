@@ -46,7 +46,7 @@ module Paypal
 			return "#{@@paypal_endpoint}?PWD=#{@@paypal_info["password"] || self.class.pwd}" +
 				"&USER=#{@@paypal_info["username"] || self.class.user}" +
 				"&SIGNATURE=#{@@paypal_info["signature"] || self.class.signature}" +
-				"&VERSION=#{PAYPAL_VERSION}"
+				"&VERSION=#{self.class.version || PAYPAL_VERSION}"
 		end
 
 		def sequentials_string

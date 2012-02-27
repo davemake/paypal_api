@@ -19,11 +19,24 @@ describe Paypal::Api::Parameter do
 		end
 
 		describe "hash enumerations" do
-			it "should allow symbols to have formatted values as output"
+			before(:each) do
+				@param = @api::Enum.new({:thing => "OK", :that => "TEO"})
+			end
 
-			it "should not respond to symbols that aren't in the hash"
+			it "should allow symbols to have formatted values as output" do
+				@param.parse(:thing).should eq("OK")
+				@param.parse(:that).should eq("TEO")
+			end
 
-			it "should know it's a hash enumeration"
+			it "should not respond to symbols that aren't in the hash" do
+				expect {
+					@param.parse("anything_else")
+				}.to raise_exception(Paypal::InvalidParameter)
+			end
+
+			it "should know it's a hash enumeration" do
+				@param.instance_variable_get("@hash_enum").should be_true
+			end
 		end
 
 		it "should coerce symbols to strings" do
@@ -95,14 +108,33 @@ describe Paypal::Api::Parameter do
 			param.to_key(:l_set_category, 1).should eq("L_SETCATEGORY1")
 		end
 
-		it "should allow a list length limit to be set"
+		it "should allow a list length limit to be set" do
+			expect {
+				param = @api::Sequential.new({:l_test => String}, 2)
+			}.to_not raise_exception
+		end
 
-		it "should raise an InvalidParameter exception when more than the limit is pushed"
+		it "should raise an InvalidParameter exception when more than the limit is pushed" do
+			param = @api::Sequential.new({:test => String}, 2)
+			param.push(:test => "ok")
+			param.push(:test => "asdf")
+
+			expect {
+				param.push(:test => "asdfasdf")
+			}.to raise_exception(Paypal::InvalidParameter)
+		end
 
 		describe "when a to_key proc is provided" do
-			it "should use the proc to output keys"
+			it "should use the proc to output keys" do
+				@lambda = lambda {|key, i|
+					"someThing#{i}.#{key}"
+				}
+				param = @api::Sequential.new({:test => String}, 2, @lambda)
+				param.push(:test => "ok")
+				param.push(:test => "asdf")
 
-			it "should pass the key and iteration to the proc"
+				param.to_query_string.should eq("&someThing0.test=ok&someThing1.test=asdf")
+			end
 		end
 	end
 
