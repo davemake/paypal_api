@@ -8,7 +8,7 @@ describe Paypal::Api do
 	describe :set_request_signature do
 		it "should be callable from a class body definition" do
 			expect {
-				class Test < @api
+				class Testical < @api
 					set_request_signature :test, {}
 				end
 			}.to_not raise_exception
@@ -16,7 +16,7 @@ describe Paypal::Api do
 
 		context "with field descriptions" do
 			before do
-				class Test < @api
+				class Testical < @api
 					set_request_signature :tester, {
 						:test_field => "something",
 						:optional => @api::Optional.new(String),
@@ -30,27 +30,27 @@ describe Paypal::Api do
 			end
 
 			it "should add getters for all keys" do
-				Test.tester.payload.each do |k,v|
-					Test.tester.respond_to?(k).should be_true
+				Testical.tester.payload.each do |k,v|
+					Testical.tester.respond_to?(k).should be_true
 				end
 			end
 
 			it "should return a dynamic request object" do
-				Test.tester.class.should eq(Paypal::TesterRequest)
+				Testical.tester.class.should eq(Paypal::TesterRequest)
 			end
 
 			it "should make the class respond to class method" do
-				Test.respond_to?(:tester).should be_true
+				Testical.respond_to?(:tester).should be_true
 			end
 
 			it "should add constant getters and not setters for value types" do
-				Test.tester.respond_to?(:test_field).should be_true
-				Test.tester.send(:test_field).should eq("something")
-				Test.tester.respond_to?(:test_field=).should be_false
+				Testical.tester.respond_to?(:test_field).should be_true
+				Testical.tester.send(:test_field).should eq("something")
+				Testical.tester.respond_to?(:test_field=).should be_false
 			end
 
 			it "should add setters for all non-constant types" do
-				request = Test.tester
+				request = Testical.tester
 				request.payload.each do |k,v|
 					if [String, Fixnum, Float].include?(v.class)
 						request.respond_to?(k).should be_false
@@ -61,7 +61,7 @@ describe Paypal::Api do
 			end
 
 			it "should raise an InvalidRequest error when missing required fields" do
-				request = Test.tester
+				request = Testical.tester
 				expect {
 					request.make
 				}.to raise_exception(Paypal::InvalidRequest)
@@ -69,7 +69,7 @@ describe Paypal::Api do
 
 			describe "setters" do
 				before do
-					@request = Test.tester
+					@request = Testical.tester
 				end
 
 				it "should handle sequential types" do

@@ -44,6 +44,7 @@ describe Paypal::Request do
 		describe "for production" do
 			before do
 				Module.should_receive(:const_defined?).and_return(true)
+				Module.should_receive(:const_get).and_return(stub(:root => true))
 
 				Paypal::Request.any_instance.should_receive(:get_info).and_return({"environment" => "production" })
 			end
@@ -72,7 +73,7 @@ describe Paypal::Request do
 		before do
 			@api = Paypal::Api
 
-			class Test < @api
+			class Testical < @api
 				set_request_signature :tester, {
 					:test_field => "something",
 					:optional => @api::Optional.new(String),
@@ -84,7 +85,7 @@ describe Paypal::Request do
 				}
 			end
 
-			@request = Test.tester({
+			@request = Testical.tester({
 				:string => "adsafasdf",
 				:fixnum => 23,
 				:enum => :one

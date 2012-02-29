@@ -64,6 +64,36 @@ production:
   signature: <%= ENV["PAYPAL_SIGNATURE"] %>
 ```
 
+## Ipn Messages
+
+there is an ipn message model generator: `rails generate paypal:ipn_message`, it will create
+a migration and the IpnMessage model.
+
+you must add a route and a handler like so:
+
+```ruby
+# config/routes
+MyApp::Application.routes.draw do
+
+  match '/ipn_message', to: 'handlers#handle_ipn', as: 'ipn_message'
+
+end
+
+# app/controllers/handlers_controller.rb
+class HandlersController < ApplicationController
+
+  def handle_ipn
+    @ipn_message = IpnMessage.create_from_message(params) # provided by generator
+
+    @ipn_message.success?
+    @ipn_message.correlation_id
+    @ipn_message.transaction_id # not always provided
+    @ipn_message.message # raw text of the message
+  end
+
+end
+```
+
 # Current Status
 
 alpha
@@ -91,6 +121,11 @@ here's a list of api methods, and whether or not they are implemented (please ta
 like to contribute, i've made it pretty easy to add compatibility for a new api call)
 
 ## Payments Pro
+
+note that paypal has a strict policy about who they approve for
+payments pro. you can sign up for it, and start testing it, but as soon as your first
+real charge goes through, they will vet your website and many people have gotten burned
+by this (including me, sad sad me...).
 
 * do_direct_payment - &#10003;
 

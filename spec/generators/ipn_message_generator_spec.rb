@@ -11,6 +11,10 @@ describe Paypal::Generators::IpnMessageGenerator do
     run_generator
   end
 
+  it "should have file" do
+    assert_file "app/models/ipn_message.rb"
+  end
+
   specify do
     destination_root.should have_structure {
       no_file "test.rb"

@@ -104,7 +104,7 @@ module Paypal
 
 				@@paypal_info = {}
 
-				@@paypal_info = get_info if Module.const_defined?("Rails")
+				@@paypal_info = get_info if Module.const_defined?("Rails") && !Module.const_get("Rails").root.nil?
 
 				@@paypal_endpoint = (@@paypal_info["environment"] == "production" || Paypal::Request.environment == "production") ? "https://api-3t.paypal.com/nvp" : "https://api-3t.sandbox.paypal.com/nvp"
 

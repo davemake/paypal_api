@@ -1,3 +1,4 @@
+require "rails/all"
 require "spec_helper"
 
 describe Paypal::Api::Parameter do
@@ -67,13 +68,13 @@ describe Paypal::Api::Parameter do
 
 	describe Paypal::Api::Sequential do
 		before do
-			class Test < @api
+			class Testical < @api
 				set_request_signature :tester, {
 					:sequential => @api::Sequential.new({:l_string => String, :l_fixnum => Fixnum, :l_set_category => Optional.new(String)})
 				}
 			end
 
-			@request = Test.tester
+			@request = Testical.tester
 			@request.sequential.push({:l_string => "sasdf", :l_fixnum => 23, :l_set_category => "asdfasdf"})
 
 
