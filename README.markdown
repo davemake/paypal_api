@@ -56,12 +56,14 @@ test:
   username: "user_api1.something.com"
   password: "some_password_they_gave_you"
   signature: "some_signature"
+  application_id: "APP-80W284485P519543T" # only necessary for adaptive payments api
 
 production:
   environment: "production"
   username: <%= ENV["PAYPAL_USERNAME"] %>
   password: <%= ENV["PAYPAL_PASSWORD"] %>
   signature: <%= ENV["PAYPAL_SIGNATURE"] %>
+  application_id <%= ENV["PAYPAL_APP_ID"] %>
 ```
 
 ## Ipn Messages
@@ -69,7 +71,7 @@ production:
 there is an ipn message model generator: `rails generate paypal:ipn_message`, it will create
 a migration and the IpnMessage model.
 
-you must add a route and a handler like so:
+you must edit the route and add a handler like so:
 
 ```ruby
 # config/routes
@@ -93,6 +95,15 @@ class HandlersController < ApplicationController
 
 end
 ```
+
+## Testing
+
+i'm an rspec kinda guy. note that i have test for actual requests against the paypal
+sandbox server, but they are off by default. remove the line about `:slow_paypal` in
+`spec/spec_helper.rb` to turn these back on.
+
+also note that, for the Adaptive Payments api, an application id is required, for testing,
+you can use this: "APP-80W284485P519543T" ([https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_APGettingStarted](https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_APGettingStarted))
 
 # Current Status
 
@@ -186,6 +197,11 @@ note that you need to request that paypal enable mass pay for your account befor
 ## Express Checkout
 
 ## Adaptive Payments
+
+this api is very different from the others... getting it to work with the way i built things already
+required some ugly stuff, but it helps keep the gem consistent from the outside.
+
+* pay - &#10003;
 
 ## Adaptive Accounts
 
