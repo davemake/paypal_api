@@ -2,7 +2,7 @@ require "rails/all"
 require "spec_helper"
 require "generator_spec/test_case"
 
-describe IpnMessageGenerator do
+describe Paypal::Generators::IpnMessageGenerator do
   include GeneratorSpec::TestCase
   destination File.expand_path("../../tmp", __FILE__)
 
@@ -11,7 +11,7 @@ describe IpnMessageGenerator do
     run_generator
   end
 
-  it "should have file" do
+  it "should add model file" do
     assert_file "app/models/ipn_message.rb"
   end
 
