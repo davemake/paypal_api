@@ -4,10 +4,6 @@ module Paypal
 			string = string.to_s
 			return URI.escape(string, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
 		end
-
-		def to_key(symbol)
-			return symbol.to_s.gsub(/[^a-z0-9]/i, "").upcase
-		end
 	end
 
 	class Api
@@ -133,9 +129,17 @@ module Paypal
 				# create api method
 				self.class_eval <<-EOS
 					def self.#{name}(hash = {})
+						@parent_api = Paypal::#{class_name}
 						return #{klass}.new(hash)
 					end
 				EOS
+			end
+
+			protected
+
+			# hack for no Bool class :'(
+			def self.bool_class
+				return Enum.new("true", "false")
 			end
 
 			# TODO: make this useful :'(

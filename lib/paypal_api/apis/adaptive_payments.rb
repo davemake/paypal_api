@@ -26,7 +26,7 @@ module Paypal
 			:receiver => Sequential.new({
 					:email => String,
 					:amount => Float,
-					:primary => Optional.new(Boolean),
+					:primary => Optional.new(bool_class),
 					:invoice_id => Optional.new(String), # max 127 char
 					:payment_type => Optional.new(Enum.new({
 						:goods => "GOODS",
@@ -49,14 +49,14 @@ module Paypal
 
 			# parallel payments
 			# 	request is considered parallel if more than one receiver is added
-			:reverse_all_parallel_payments_on_error => Optional.new(Boolean)
+			:reverse_all_parallel_payments_on_error => Optional.new(bool_class),
 
 			# chained payments
 			# 	choose one of your receivers to be primary = true and the rest false to initiate a chained payment
 
 			# implicit payments
 			# 	if you are the api caller and you put in your own email address here, it is automatically approved
-			:sender_email => Optional.new(String)
+			:sender_email => Optional.new(String),
 
 			# preapproval payments
 			# 	if you provide the following, and it is accurate, the payment will automatically be approved
@@ -89,13 +89,13 @@ module Paypal
 			:memo => Optional.new(String), # max 1000 char
 
 			:request_envelope => Hash.new({
-				:detail_level => Default.new("ReturnAll"),
+				:detail_level => Default.new("ReturnAll", Optional.new(String)),
 				:error_language => "en_US"
 			}), # docs don't say the options for this...
 
 
 			:sender => Optional.new(Hash.new({
-				:user_credentials => Boolean
+				:user_credentials => bool_class
 			})),
 
 			:tracking_id => Optional.new(String)
@@ -104,7 +104,7 @@ module Paypal
 
 	end
 
-	class PayRequest < request
+	class PayRequest < Request
 		# customize validation here
 		# ...there may be some special cases with this api, i'm not positive yet
 	end

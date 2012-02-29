@@ -53,6 +53,14 @@ module Paypal
 			self.class.sequential_keys.map{|k| self.send(k).to_query_string }.join
 		end
 
+		def to_key(symbol)
+			if @parent_api && @parent_api.respond_to?(:to_key)
+				return @parent_api.to_key(symbol)
+			else
+				return symbol.to_s.gsub(/[^a-z0-9]/i, "").upcase
+			end
+		end
+
 		def request_string
 			(@payload.keys | self.class.required_keys).inject(paypal_endpoint_with_defaults + sequentials_string) do |acc, key|
 				# if key signature is hash or optional...
