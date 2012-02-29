@@ -2,7 +2,7 @@ require "rails/all"
 require "spec_helper"
 require "generator_spec/test_case"
 
-describe Paypal::Generators::IpnMessageGenerator do
+describe IpnMessageGenerator do
   include GeneratorSpec::TestCase
   destination File.expand_path("../../tmp", __FILE__)
 
@@ -21,19 +21,19 @@ describe Paypal::Generators::IpnMessageGenerator do
       directory "app" do
         directory "models" do
           file "ipn_message.rb" do
-            contains "def create_from_message"
+            contains "def self.create_from_message"
             contains "def unique_ids"
           end
         end
       end
       directory "db" do
         directory "migrate" do
-          file "create_ipn_messages.rb"
-          migration "create_ipn_messages" do
-            contains "class IpnMessageMigration"
+          migration "add_ipn_messages" do
+            contains "class CreateIpnMessages"
             contains ":message"
             contains ":correlation_id"
             contains ":transaction_id"
+            contains ":tracking_id"
             contains ":success"
           end
         end
