@@ -14,10 +14,15 @@ class IpnMessage < ActiveRecord::Base
 		return ipn_message
 	end
 
+	# returns hash of unique_id:string => status:bool
 	def unique_ids
 		hash = YAML.load(self.body)
 
-
+		return hash.inject({}){|acc, (k,v)|
+			k.to_s =~ /unique_id_(\d+)/
+			acc[v] = hash["status_#{$1}"] == "Completed" if $1
+			acc
+		}
 	end
 
 end
