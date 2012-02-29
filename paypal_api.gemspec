@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   # s.add_dependency "activesupport", "~> 3.1"
   s.add_dependency "rails", "~> 3.1"
 
+  s.add_development_dependency "ruby-debug19"
   s.add_development_dependency "rspec-rails", "~> 2.6"
   s.add_development_dependency "generator_spec", "0.8.5"
   # s.add_development_dependency "rake", "0.8.7"
