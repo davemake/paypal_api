@@ -1,10 +1,10 @@
 require "spec_helper"
 
-describe Paypal::MassPay do
+describe Paypal::MassPayApi do
 
 	describe :mass_pay do
 		before(:each) do
-			@request = Paypal::MassPay.mass_pay
+			@request = Paypal::MassPayApi.mass_pay
 		end
 
 		it "should be invalid without a payee" do
