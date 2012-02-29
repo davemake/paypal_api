@@ -54,8 +54,8 @@ module Paypal
 		end
 
 		def to_key(symbol)
-			if @parent_api && @parent_api.respond_to?(:to_key)
-				return @parent_api.to_key(symbol)
+			if (parent_api = self.class.parent_api) && parent_api.respond_to?(:to_key)
+				return parent_api.to_key(symbol)
 			else
 				return symbol.to_s.gsub(/[^a-z0-9]/i, "").upcase
 			end
@@ -108,11 +108,16 @@ module Paypal
 				return true
 			end
 
+			# for completeness
+			def self.parent_api
+				return nil
+			end
+
 			def config
 
 				@@paypal_info = {}
 
-				@@paypal_info = get_info if Module.const_defined?("Rails") && !Module.const_get("Rails").root.nil?
+				@@paypal_info = get_info if Module.const_defined?("Rails") && (Module.const_get("Rails").respond_to?(:root) && !Module.const_get("Rails").root.nil?)
 
 				@@paypal_endpoint = (@@paypal_info["environment"] == "production" || Paypal::Request.environment == "production") ? "https://api-3t.paypal.com/nvp" : "https://api-3t.sandbox.paypal.com/nvp"
 

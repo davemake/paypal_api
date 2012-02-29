@@ -10,8 +10,10 @@ module Paypal
 					return "requestEnvelope.errorLanguage"
 				# when :reverse_all_parallel_payments_on_error then
 				# 	return "reverseAllParallelPaymentsonError" # may just be a typo in docs, need to test
-				when :request_envelope then
-					return "requestenvelope"
+				when :request_envelope_detail_level then
+					return "requestEnvelope.detailLevel"
+				when :sender_use_credentials
+					return "sender.useCredentials"
 				else
 					#camelcaps but first letter is lowercase
 					cameled = symbol_to_camel(symbol)
@@ -45,7 +47,6 @@ module Paypal
 			:currency_code => Default.new("USD", String),
 			:cancel_url => String,
 			:return_url => String,
-			:request_envelope_error_language => "en_US",
 
 			# parallel payments
 			# 	request is considered parallel if more than one receiver is added
@@ -61,7 +62,7 @@ module Paypal
 			# preapproval payments
 			# 	if you provide the following, and it is accurate, the payment will automatically be approved
 			:preapproval_key => Optional.new(String),
-			:pin => String,
+			:pin => Optional.new(String),
 
 
 			:client_details => Optional.new({
@@ -88,15 +89,10 @@ module Paypal
 			:ipn_notification_url => Optional.new(String),
 			:memo => Optional.new(String), # max 1000 char
 
-			:request_envelope => Hash.new({
-				:detail_level => Default.new("ReturnAll", Optional.new(String)),
-				:error_language => "en_US"
-			}), # docs don't say the options for this...
+			:request_envelope_error_language => "en_US",
+			:request_envelope_detail_level => Default.new("ReturnAll", Optional.new(String)),
 
-
-			:sender => Optional.new(Hash.new({
-				:user_credentials => bool_class
-			})),
+			:sender_user_credentials => Optional.new(bool_class),
 
 			:tracking_id => Optional.new(String)
 

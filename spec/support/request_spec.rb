@@ -44,7 +44,7 @@ describe Paypal::Request do
 		describe "for production" do
 			before do
 				Module.should_receive(:const_defined?).and_return(true)
-				Module.should_receive(:const_get).and_return(stub(:root => true))
+				Module.should_receive(:const_get).twice.and_return(stub(:root => true))
 
 				Paypal::Request.any_instance.should_receive(:get_info).and_return({"environment" => "production" })
 			end

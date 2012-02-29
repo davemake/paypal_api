@@ -99,10 +99,15 @@ module Paypal
 			end
 
 			def self.set_request_signature(name, hash)
+
 				# create request object
 				class_name = "#{self.symbol_to_camel name}Request"
 				self.class.class_eval <<-EOS
-				  class Paypal::#{class_name} < Request; end
+				  class Paypal::#{class_name} < Request;
+				  	def self.parent_api
+				  		return #{self}
+				  	end
+				  end
 				EOS
 				klass = Kernel.const_get("Paypal").const_get(class_name)
 
@@ -129,7 +134,6 @@ module Paypal
 				# create api method
 				self.class_eval <<-EOS
 					def self.#{name}(hash = {})
-						@parent_api = Paypal::#{class_name}
 						return #{klass}.new(hash)
 					end
 				EOS
