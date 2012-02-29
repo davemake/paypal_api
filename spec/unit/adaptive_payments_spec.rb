@@ -35,7 +35,7 @@ describe Paypal::AdaptivePayments do
 
 			shared_examples_for "a good pay request" do
 				it "should look like a successful request" do
-					@request.request_string.should include("https://api-3t.sandbox.paypal.com/nvp?PWD=&USER=&SIGNATURE=&VERSION=84.0&receiverList.receiver(0).email=test%40dude.com&receiverList.receiver(0).amount=10.22&actionType=")
+					@request.request_string.should include("&receiverList.receiver(0).email=test%40dude.com&receiverList.receiver(0).amount=10.22&actionType=")
 					@request.request_string.should include("&currencyCode=USD&cancelUrl=http%3A%2F%2Fwww.test.com%2Fcancel&returnUrl=http%3A%2F%2Fwww.test.com%2Freturn&requestEnvelope.errorLanguage=en_US&requestEnvelope.detailLevel=ReturnAll")
 				end
 
