@@ -19,8 +19,13 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency "activesupport", "~> 3.1"
+  s.add_dependency "rails", "~> 3.1"
 
-  s.add_development_dependency "rspec", "~> 2.6"
-  s.add_development_dependency "rspec-mocks", "~> 2.6"
-  s.add_development_dependency "rake", "0.8.7"
+  # s.add_development_dependency "rspec", "~> 2.6"
+  # s.add_development_dependency "rspec-mocks", "~> 2.6"
+  # s.add_development_dependency "rake", "0.8.7"
+  # s.add_development_dependency "rails", "~> 3.1"
+  s.add_development_dependency "rspec-rails" #, "~> 2.6"
+  s.add_development_dependency "generator_spec", "0.8.5"
+  # s.add_development_dependency "activemodel", "~> 3.1"
 end
