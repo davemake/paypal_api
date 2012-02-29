@@ -98,14 +98,31 @@ module Paypal
 				return symbol.to_s.downcase.split("_").map(&:capitalize).join
 			end
 
+			def self.symbol_to_lower_camel(symbol)
+				cameled = symbol_to_camel(symbol)
+				return cameled[0].downcase + cameled.split(/./, 2).join
+			end
+
 			def self.set_request_signature(name, hash)
+
+				# create Request subclass if not already created
+				subname = self.to_s.split("::")[1]
+				if !Paypal.const_defined?("#{subname}Request")
+					Paypal.class_eval <<-EOS
+						class #{subname}Request < Request
+							def self.parent_api
+								return #{self}
+							end
+						end
+					EOS
+				end
 
 				# create request object
 				class_name = "#{self.symbol_to_camel name}Request"
-				self.class.class_eval <<-EOS
-				  class Paypal::#{class_name} < Request;
-				  	def self.parent_api
-				  		return #{self}
+				Paypal.class_eval <<-EOS
+				  class #{class_name} < #{subname}Request
+				  	def self.api_method
+				  		return "#{name}"
 				  	end
 				  end
 				EOS
@@ -138,8 +155,6 @@ module Paypal
 					end
 				EOS
 			end
-
-			protected
 
 			# hack for no Bool class :'(
 			def self.bool_class

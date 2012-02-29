@@ -1,6 +1,7 @@
 require "cgi"
 require "open-uri"
 require 'active_support/core_ext/class/attribute_accessors'
+require "net/http"
 
 module Paypal
 	class InvalidRequest < StandardError; end

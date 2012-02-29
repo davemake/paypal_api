@@ -1,7 +1,7 @@
 module Paypal
 	class Request
 
-		cattr_accessor :environment, :user, :pwd, :signature, :version
+		cattr_accessor :environment, :user, :pwd, :signature, :version, :application_id
 
 		PAYPAL_VERSION = "84.0"
 		@@paypal_info = nil
@@ -12,7 +12,7 @@ module Paypal
 		@required = []
 		@sequential = []
 
-		attr_accessor :payload, :error_message
+		attr_accessor :payload, :error_message, :test_request
 
 		def initialize(payload = {})
 			config
@@ -42,11 +42,15 @@ module Paypal
 			@sequential
 		end
 
+		def request_host
+			URI.parse(@@paypal_endpoint).host
+		end
+
 		def paypal_endpoint_with_defaults
-			return "#{@@paypal_endpoint}?PWD=#{@@paypal_info["password"] || self.class.pwd}" +
-				"&USER=#{@@paypal_info["username"] || self.class.user}" +
-				"&SIGNATURE=#{@@paypal_info["signature"] || self.class.signature}" +
-				"&VERSION=#{self.class.version || PAYPAL_VERSION}"
+			return "#{@@paypal_endpoint}?PWD=#{password}" +
+				"&USER=#{user}" +
+				"&SIGNATURE=#{signature}" +
+				"&VERSION=#{version}"
 		end
 
 		def sequentials_string
@@ -54,11 +58,7 @@ module Paypal
 		end
 
 		def to_key(symbol)
-			if (parent_api = self.class.parent_api) && parent_api.respond_to?(:to_key)
-				return parent_api.to_key(symbol)
-			else
-				return symbol.to_s.gsub(/[^a-z0-9]/i, "").upcase
-			end
+			return symbol.to_s.gsub(/[^a-z0-9]/i, "").upcase
 		end
 
 		def request_string
@@ -70,38 +70,92 @@ module Paypal
 
 		# separated out so as not to stub Kernel.open in tests
 		def make_request
-			response = open(request_string)
-			return Paypal::Response.new(response)
+			response = nil
+			if self.respond_to? :headers
+				uri = URI.parse(request_string)
+
+				http = Net::HTTP.new(uri.host, uri.port)
+				http.set_debug_output $stderr if @test_request
+				http.use_ssl = true
+				http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+				request = Net::HTTP::Get.new(uri.request_uri)
+				headers.each do |k,v|
+					request[k] = v
+				end
+
+				response = http.request(request).body
+			else
+				$stderr.puts(request_string) if @test_request
+
+				response = open(request_string)
+			end
+
+			return process_response(response)
+		end
+
+		def process_response(response)
+			Paypal::Response.new(response)
 		end
 
 		def make(&block)
 			params_fulfilled?
 			validate!
 
-			begin
-				response = make_request
+			response = make_request
 
-				if block
-					yield response
-				else
-					return response
+			if block
+				yield response
+			else
+				return response
+			end
+
+			do_request = lambda {
+
+			}
+
+			if @test_request
+				do_request.call
+			else
+				begin
+					do_request.call
+				rescue OpenURI::HTTPError => error
+					# status_code = error.io.status[0]
+					# Rails.logger.info "[ERROR][Paypal] #{error.message } : #{error.backtrace} " if @@rails
+					raise $!
+				# rescue Timeout::Error => time_out_error
+				# 	Rails.logger.info "[ERROR][Timeout Error] #{time_out_error.message} : #{time_out_error.backtrace}" if @@rails
+				# 	raise $!
+				rescue => err
+					# Rails.logger.info "[ERROR][Something went wrong] #{err.message} : #{err.backtrace}" if @@rails
+					raise $!
 				end
-			rescue OpenURI::HTTPError => error
-				status_code = error.io.status[0]
-				# Rails.logger.info "[ERROR][Paypal] #{error.message } : #{error.backtrace} " if @@rails
-				raise $!
-			# rescue Timeout::Error => time_out_error
-			# 	Rails.logger.info "[ERROR][Timeout Error] #{time_out_error.message} : #{time_out_error.backtrace}" if @@rails
-			# 	raise $!
-			rescue => err
-				# Rails.logger.info "[ERROR][Something went wrong] #{err.message} : #{err.backtrace}" if @@rails
-				raise $!
 			end
 		end
 
 		protected
 
 			include Paypal::Formatters
+
+			def user
+				@@paypal_info["username"] || self.class.user
+			end
+
+			def signature
+				@@paypal_info["signature"] || self.class.signature
+			end
+
+			def password
+				@@paypal_info["password"] || self.class.pwd
+			end
+
+			def application_id
+				@@paypal_info["application_id"] || self.class.application_id
+			end
+
+			def version
+				self.class.version || PAYPAL_VERSION
+			end
 
 			# override for custom request validation
 			def validate!
@@ -113,13 +167,25 @@ module Paypal
 				return nil
 			end
 
+			def self.api_method
+				""
+			end
+
+			def self.api_endpoint
+				"https://api-3t.paypal.com/nvp"
+			end
+
+			def self.api_sandbox_endpoint
+				"https://api-3t.sandbox.paypal.com/nvp"
+			end
+
 			def config
 
 				@@paypal_info = {}
 
 				@@paypal_info = get_info if Module.const_defined?("Rails") && (Module.const_get("Rails").respond_to?(:root) && !Module.const_get("Rails").root.nil?)
 
-				@@paypal_endpoint = (@@paypal_info["environment"] == "production" || Paypal::Request.environment == "production") ? "https://api-3t.paypal.com/nvp" : "https://api-3t.sandbox.paypal.com/nvp"
+				@@paypal_endpoint = (@@paypal_info["environment"] == "production" || Paypal::Request.environment == "production") ? self.class.api_endpoint : self.class.api_sandbox_endpoint
 
 			end
 

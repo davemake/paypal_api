@@ -1,7 +1,84 @@
-module Paypal
-	class AdaptivePayments < Paypal::Api
+# note: things got a little weird here because the paypal apis
+# 	are so different, but i tried to make it work smoothly... at least
+# 	it is from outside interaction... wahhh
 
-		def self.to_key(symbol)
+module Paypal
+
+	class AdaptivePaymentsResponse < Response
+		def initialize(stringio)
+			@raw_response = stringio.class == StringIO ? stringio.read : stringio
+			@parsed_response = CGI.parse(@raw_response)
+
+			@success = @parsed_response["responseEnvelope.ack"] == ["Success"]
+
+			unless @success
+				# "responseEnvelope.timestamp"=>["2012-02-29T13:35:28.528-08:00"],
+				# "responseEnvelope.ack"=>["Failure"],
+				# "responseEnvelope.correlationId"=>["ca0befbd1fe0b"],
+				# "responseEnvelope.build"=>["2486531"],
+				# "error(0).errorId"=>["560022"],
+				# "error(0).domain"=>["PLATFORM"],
+				# "error(0).subdomain"=>["Application"],
+				# "error(0).severity"=>["Error"],
+				# "error(0).category"=>["Application"],
+				# "error(0).message"=>["The X-PAYPAL-APPLICATION-ID header contains an invalid value"],
+				# "error(0).parameter(0)"=>["X-PAYPAL-APPLICATION-ID"]
+
+				@error_message = @parsed_response["error(0).message"][0]
+				@error_code = @parsed_response["error(0).errorId"][0]
+				@paypal_error_field = @parsed_response["error(0).parameter(0)"][0]
+			end
+		end
+
+		protected
+
+			def symbol_to_key(symbol)
+				case symbol
+				when :correlation_id
+					return "responseEnvelope.correlationId"
+				else
+					return Paypal::Api.symbol_to_lower_camel(symbol)
+				end
+			end
+	end
+
+	class AdaptivePaymentsRequest < Request
+		# customize validation here
+		attr_accessor :ip_address
+
+		def self.api_endpoint
+			"https://svcs.paypal.com/AdaptivePayments/#{api_method.capitalize}"
+		end
+
+		def self.api_sandbox_endpoint
+			"https://svcs.sandbox.paypal.com/AdaptivePayments/#{api_method.capitalize}"
+		end
+
+		def headers
+			{
+				"X-PAYPAL-SECURITY-USERID" => user,
+				"X-PAYPAL-SECURITY-PASSWORD" => password,
+				"X-PAYPAL-SECURITY-SIGNATURE" => signature,
+				"X-PAYPAL-DEVICE-IPADDRESS" => @ip_address,
+				"X-PAYPAL-REQUEST-DATA-FORMAT" => "NV",
+				"X-PAYPAL-RESPONSE-DATA-FORMAT" => "NV",
+				"X-PAYPAL-APPLICATION-ID" => application_id
+			}
+		end
+
+		def process_response(response)
+			return AdaptivePaymentsResponse.new(response)
+		end
+
+		def make_request
+			if @ip_address.nil?
+				throw Paypal::InvalidRequest, "need an ip address"
+			else
+				super
+			end
+		end
+
+		def to_key(symbol)
 			if symbol.is_a?(String)
 				return symbol
 			else
@@ -14,13 +91,17 @@ module Paypal
 					return "requestEnvelope.detailLevel"
 				when :sender_use_credentials
 					return "sender.useCredentials"
+				when :method
+					return "METHOD"
 				else
 					#camelcaps but first letter is lowercase
-					cameled = symbol_to_camel(symbol)
-					return cameled[0].downcase + cameled.split(/./, 2).join
+					return Paypal::Api.symbol_to_lower_camel(symbol)
 				end
 			end
 		end
+	end
+
+	class AdaptivePayments < Paypal::Api
 
 		set_request_signature :pay, {
 			# standard params
@@ -43,7 +124,7 @@ module Paypal
 						:phone_number => String,
 						:extension => Optional.new(String)
 					})
-				}, 6, lambda {|key, i| "receiverList.receiver(#{i}).#{Paypal::AdaptivePayments.to_key(key)}" }),
+				}, 6, lambda {|key, i| "receiverList.receiver(#{i}).#{Paypal::AdaptivePaymentsRequest.new.to_key(key)}" }),
 			:currency_code => Default.new("USD", String),
 			:cancel_url => String,
 			:return_url => String,
@@ -98,10 +179,5 @@ module Paypal
 
 		}
 
-	end
-
-	class PayRequest < Request
-		# customize validation here
-		# ...there may be some special cases with this api, i'm not positive yet
 	end
 end

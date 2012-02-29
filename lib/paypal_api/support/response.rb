@@ -1,7 +1,7 @@
 module Paypal
 	class Response
 
-		attr_accessor :raw_response, :parsed_response, :error_code
+		attr_accessor :raw_response, :parsed_response, :error_code, :paypal_error_field
 
 		def initialize(stringio)
 			@raw_response = stringio.class == StringIO ? stringio.read : stringio
@@ -36,14 +36,14 @@ module Paypal
 		end
 
 		def error_field
-			@@error_codes[@error_code] ? @@human_readable[@@error_codes[@error_code]] : nil
+			@paypal_error_field || (@@error_codes[@error_code] ? @@human_readable[@@error_codes[@error_code]] : nil)
 		end
 
 		def error_message
 			@error_message + "[#{@error_code}]"
 		end
 
-		private
+		protected
 
 			def symbol_to_key(symbol)
 				return symbol.to_s.gsub(/[^0-9a-z]/i, "").upcase
