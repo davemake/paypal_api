@@ -91,9 +91,7 @@ the actual api method definitions should be more or less readable as is (if not,
 it's hard to navigate paypals terribly organized everything, here are some links to help you find what you need:
 
 paypal api credentials for production: [https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature](https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature)
-
 sandbox credentials: [https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0](https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0)
-
 where to tell paypal what your ipn callback url is: [https://www.paypal.com/cgi-bin/customerprofileweb?cmd=_profile-ipn-notify](https://www.paypal.com/cgi-bin/customerprofileweb?cmd=_profile-ipn-notify)
 
 ### Simple Configuration
@@ -128,7 +126,7 @@ production:
 
 ## Ipn Messages
 
-there is an ipn message model generator: `rails generate paypal:ipn_message`, it will create
+there is an ipn message model generator: `$ rails generate paypal:ipn_message`, it will create
 a migration and the IpnMessage model.
 
 you must edit the route and add a handler like so:
@@ -177,14 +175,39 @@ repository. in order to get to that stage, i will need to add support for adapti
 
 # How To Contribute
 
-right now the most help i could use is in writing the specs for the various api calls from the Payments Pro api. i will be working on
-separating out the different access methods shortly (there's a huge difference between how to call the Payments Pro api vs the Adaptive Payments api).
+right now the most help i could use is in writing the signatures for the various api calls from the Payments Pro and Adaptive Payments apis (or any others).
 
-as this is my first gem, i could also use help with some of the niceties with rails. ideally there will be a generator for migrating your db
-to store ipn messages, and a generated class with callbacks to handle the various cases. this will probably take a lot of effort since there
-are many intricacies in the meanings of the different ipn's.
+i've tried to make it pretty easy to contribute, signatures are created pretty easily:
 
-for contributing to the api method request specs, look at `lib/paypal_api/apis/payments_pro.rb`
+```ruby
+# lib/paypal_api/apis/payments_pro.rb
+
+module Paypal
+  class PaymentsPro < Paypal::Api
+
+    set_request_signature :do_capture, {
+      :method => "DoCapture",
+      :authorization_id => String,
+      :amt => Float,
+      :currency_code => Default.new("USD", /^[a-z]{3}$/i),
+      :complete_type => Default.new("Complete", Enum.new("Complete", "NotComplete")),
+      :inv_num => Optional.new(String),
+      :note => Optional.new(String),
+      :soft_descriptor => Optional.new(lambda {|val|
+        if val.match(/^([a-z0-9]|\.|-|\*| )*$/i) && val.length <= 22
+          return true
+        else
+          return false
+        end
+      }),
+
+      :store_id => Optional.new(String),
+      :terminal_id => Optional.new(String)
+    }
+
+  end
+end
+```
 
 this is my first gem, so i'll be excited for any contributions :'(
 
