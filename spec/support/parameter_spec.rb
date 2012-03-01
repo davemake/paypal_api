@@ -19,6 +19,14 @@ describe Paypal::Api::Parameter do
 			}.to raise_exception(Paypal::InvalidParameter)
 		end
 
+		it "should allow lookup on normalized matching" do
+			param = @api::Enum.new("This", "FirstTest", "SaweetDude")
+
+			param.parse(:this).should eq("This")
+			param.parse(:first_test).should eq("FirstTest")
+			param.parse(:saweet_dude).should eq("SaweetDude")
+		end
+
 		describe "hash enumerations" do
 			before(:each) do
 				@param = @api::Enum.new({:thing => "OK", :that => "TEO"})

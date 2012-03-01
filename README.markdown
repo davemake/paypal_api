@@ -21,11 +21,12 @@ the most useful methods, imo, are do_direct_payment, do_reference_
 ```ruby
 require "paypal_api"
 
+# create request
 request = Paypal::PaymentsPro.do_reference_transaction # returns instance of Paypal::DoDirectPaymentRequest
 
 # set required fields
 request.reference_id = "other_paypal_transaction_id"
-request.payment_action = "Authorization"
+request.payment_action = :authorization
 request.amt = 10.00
 
 # make request
@@ -34,7 +35,17 @@ response = request.make
 # usable information
 response.success? # true if successful
 response[:correlation_id] # correlation id string returned by paypal
-response[:transaction_id] # transaction id string, not return on all calls
+transaction_id = response[:transaction_id] # transaction id string, not return on all calls
+
+# in this example, since the first request was an authorization, you can then capture it
+request2 = Paypal::PaymentsPro.do_capture # returns instance of Paypal::DoCaptureRequest
+
+request2.authorization_id = transaction_id
+request2.amt = 10.00
+
+response2 = request2.make
+
+response2.success?
 ```
 
 ### Adaptive Payments Example
@@ -77,9 +88,13 @@ the actual api method definitions should be more or less readable as is (if not,
 
 ## Configure
 
-paypal api credentials for production can be found here: [https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature](https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature)
+it's hard to navigate paypals terribly organized everything, here are some links to help you find what you need:
 
-sandbox credentials can be found here: [https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0](https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0)
+paypal api credentials for production: [https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature](https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature)
+
+sandbox credentials: [https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0](https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0)
+
+where to tell paypal what your ipn callback url is: [https://www.paypal.com/cgi-bin/customerprofileweb?cmd=_profile-ipn-notify](https://www.paypal.com/cgi-bin/customerprofileweb?cmd=_profile-ipn-notify)
 
 ### Simple Configuration
 

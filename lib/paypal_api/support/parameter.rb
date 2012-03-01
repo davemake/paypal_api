@@ -134,6 +134,7 @@ module Paypal
 					@allowed_values = values[0]
 				else
 					@allowed_values = values
+					@normalized_values = @allowed_values.inject({}){|acc, v| acc[normalize(v)] = v; acc}
 				end
 			end
 
@@ -145,8 +146,9 @@ module Paypal
 						raise Paypal::InvalidParameter, "'#{val}' must be a key in #{@allowed_values.keys}"
 					end
 				else
-					if @allowed_values.include?(normalize(val))
-						return normalize(val)
+					normed = normalize(val)
+					if @normalized_values.include?(normed)
+						return @normalized_values[normed]
 					else
 						raise Paypal::InvalidParameter, "'#{val}' must be one of #{@allowed_values}"
 					end
@@ -154,9 +156,7 @@ module Paypal
 			end
 
 			def normalize(val)
-				return val if val.class == String
-				return Paypal::Api.symbol_to_camel(val) if val.class == Symbol
-				return nil
+				return val.to_s.downcase.gsub(/[^a-z0-9]/,"")
 			end
 		end
 
