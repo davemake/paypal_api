@@ -143,8 +143,10 @@ end
 
 ## Testing
 
-i'm an rspec kinda guy. note that i have test for actual requests against the paypal
-sandbox server, but they are off by default. remove the line about `:slow_paypal` in
+you can run the tests: `$ bundle exec rspec spec`
+
+i'm an rspec kinda guy, hopefully you are ok with that. note that i have tests for actual requests against the paypal
+sandbox server, but they are turned off by default. remove the line about `:slow_paypal` in
 `spec/spec_helper.rb` to turn these back on.
 
 also note that, for the Adaptive Payments api, an application id is required, for testing,
