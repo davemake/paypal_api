@@ -7,32 +7,81 @@ the gems that do exist do not cover the entire api.
 
 # Usage
 
-## Interfacing with the gem:
+i want interaction with the gem to be flat and straight-forward, with clear mapping between the api docs and the gem. right now
+the only place where i break this is for "list type" fields, where it makes sense to treat it more like a ruby array.
+all keys are ruby style (snake_case), and should automatically get converted to the proper formatting for you.
+
+if you don't add all the required fields to the request, it will raise `Paypal::InvalidRequest` exceptions. if you try to set the wrong
+type to a field, it will raise `Paypal::InvalidParameter` exceptions.
+
+### Payments Pro Example
+
+the most useful methods, imo, are do_direct_payment, do_reference_
+
 ```ruby
 require "paypal_api"
 
-request = Paypal::PaymentsPro.do_direct_payment # returns instance of Paypal::DoDirectPaymentRequest
+request = Paypal::PaymentsPro.do_reference_transaction # returns instance of Paypal::DoDirectPaymentRequest
 
-# Set required fields
-request.first_name = "mark"
-request.last_name = "winton"
+# set required fields
+request.reference_id = "other_paypal_transaction_id"
+request.payment_action = "Authorization"
 request.amt = 10.00
 
-# Add a list type field
-request.item.push {
-	:email => "bro@dudeman.com",
-	:amt => 23.0
-}
-
+# make request
 response = request.make
 
+# usable information
 response.success? # true if successful
-
 response[:correlation_id] # correlation id string returned by paypal
 response[:transaction_id] # transaction id string, not return on all calls
 ```
 
+### Adaptive Payments Example
+
+even though the api's are very different, they should be abstracted the same way
+
+```ruby
+require "paypal_api"
+
+request = Paypal::AdaptivePayments.pay # returns instance of Paypal::PayRequest
+
+# set required fields
+request.cancel_url = "http://www.test.com/cancel"
+request.return_url = "http://www.test.com/return"
+request.ip_address = "192.168.1.1"
+
+# add a list type field
+request.receiver.push {
+  :email => "bro@dudeman.com",
+  :amount => 23.0
+}
+
+# make request
+response = request.make
+
+# usable information
+response.success? # true if successful
+response[:pay_key] # usually what you use this api method for
+
+# errors
+response.error_message # populated by paypal response error when request fails
+response.error_code # populated by paypal response error
+response.error_field # some api calls let you know which field caused the issue
+```
+
+### More
+
+the actual api method definitions should be more or less readable as is (if not, you can call me a jerk, i sorry). look in
+`lib/paypal_api/apis/` for reference, until i document each method.
+
 ## Configure
+
+paypal api credentials for production can be found here: [https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature](https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature)
+
+sandbox credentials can be found here: [https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0](https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0)
+
+### Simple Configuration
 
 ```ruby
 Paypal::Request.version = "84.0"
@@ -42,11 +91,7 @@ Paypal::Request.pwd = "some_password_they_gave_you"
 Paypal::Request.signature = "some_signature"
 ```
 
-paypal api credentials for production can be found here: [https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature](https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature)
-
-sandbox credentials can be found here: [https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0](https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0)
-
-## Rails
+### Configure For Rails
 
 if you'd like to have multi environment configuration in rails, place a file at `config/paypal.yml` and the gem will read from it accordingly
 
