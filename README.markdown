@@ -90,9 +90,11 @@ the actual api method definitions should be more or less readable as is (if not,
 
 it's hard to navigate paypals terribly organized everything, here are some links to help you find what you need:
 
-paypal api credentials for production: [https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature](https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature)
-sandbox credentials: [https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0](https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0)
-where to tell paypal what your ipn callback url is: [https://www.paypal.com/cgi-bin/customerprofileweb?cmd=_profile-ipn-notify](https://www.paypal.com/cgi-bin/customerprofileweb?cmd=_profile-ipn-notify)
+* paypal api credentials for production: [https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature](https://www.paypal.com/us/cgi-bin/webscr?cmd=_profile-api-signature)
+
+* sandbox credentials: [https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0](https://developer.paypal.com/cgi-bin/devscr?cmd=_certs-session&login_access=0)
+
+* where to tell paypal what your ipn callback url is: [https://www.paypal.com/cgi-bin/customerprofileweb?cmd=_profile-ipn-notify](https://www.paypal.com/cgi-bin/customerprofileweb?cmd=_profile-ipn-notify)
 
 ### Simple Configuration
 
