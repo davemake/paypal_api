@@ -7,12 +7,9 @@ the gems that do exist do not cover the entire api.
 
 # Usage
 
-i want interaction with the gem to be flat and straight-forward, with clear mapping between the api docs and the gem. right now
-the only place where i break this is for "list type" fields, where it makes sense to treat it more like a ruby array.
 all keys are ruby style (snake_case), and should automatically get converted to the proper formatting for you.
 
-if you don't add all the required fields to the request, it will raise `Paypal::InvalidRequest` exceptions. if you try to set the wrong
-type to a field, it will raise `Paypal::InvalidParameter` exceptions.
+## Getting Started
 
 ### Payments Pro Example
 
@@ -195,6 +192,11 @@ sandbox server, but they are turned off by default. remove the line about `:slow
 also note that, for the Adaptive Payments api, an application id is required, for testing,
 you can use this: "APP-80W284485P519543T" ([https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_APGettingStarted](https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_APGettingStarted))
 
+## Errors
+
+if you don't add all the required fields to a request, it will raise `Paypal::InvalidRequest` exceptions. if you try to set the wrong
+type to a field, it will raise `Paypal::InvalidParameter` exceptions.
+
 # Current Status
 
 alpha
@@ -207,6 +209,9 @@ repository. in order to get to that stage, i will need to add support for adapti
 
 right now the most help i could use is in writing the signatures for the various api calls from the Payments Pro and
 Adaptive Payments apis (or any others really).
+
+i want interaction with the gem to be flat and straight-forward, with clear mapping between the api docs and the gem. right now
+the only place where i break this is for "list type" fields, where it makes sense to treat it more like a ruby array.
 
 i've tried to make it easy to contribute, signatures are created pretty easily:
 
