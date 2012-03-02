@@ -75,10 +75,40 @@ response = request.make
 response.success? # true if successful
 response[:pay_key] # usually what you use this api method for
 
+# in adaptive payments flows, sometimes you need to redirect to paypal
+response.redirect_url
+# used if you want the payment flow without the client leaving your site (see below)
+response.embedded_url
+
 # errors
 response.error_message # populated by paypal response error when request fails
 response.error_code # populated by paypal response error
 response.error_field # some api calls let you know which field caused the issue
+```
+
+for adaptive payments and preapprovals, sometimes you want to use the paypal javascript libraries
+and their associated "embedded" payment flows. `response.embedded_url` gives you what you need for this.
+note that you also need to include one of their js libraries.
+
+```javascript
+// include one of their libraries asynchronously:
+// minibrowser library: https://www.paypalobjects.com/js/external/dg.js
+// embedded library: https://www.paypalobjects.com/js/external/apdg.js
+window.paypalAsyncInit = function () {
+  window.paypalController = new PAYPAL.apps.DGFlow({expType: "mini"});
+};
+
+(function(d){
+var js, id = 'paypal-sdk'; if (d.getElementById(id)) {return;}
+js = d.createElement('script'); js.id = id; js.async = true;
+js.src = "https://www.paypalobjects.com/js/external/dg.js";
+d.getElementsByTagName('head')[0].appendChild(js);
+js.onload = window.paypalAsyncInit;
+}(document));
+
+
+// later, after receiving embedded_url from the server:
+window.paypalController.startFlow(embeddUrl);
 ```
 
 ### More
