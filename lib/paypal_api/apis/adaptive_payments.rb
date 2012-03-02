@@ -5,6 +5,7 @@
 module Paypal
 
 	class AdaptivePaymentsResponse < Response
+
 		def initialize(stringio)
 			@raw_response = stringio.class == StringIO ? stringio.read : stringio
 			@parsed_response = CGI.parse(@raw_response)
@@ -30,6 +31,17 @@ module Paypal
 			end
 		end
 
+		def redirect_url
+			"#{self.base_url}/webscr?cmd=_ap-#{command}&#{command_key}=#{command_value}" if webscr?
+		end
+
+		# requires https://www.paypalobjects.com/js/external/dg.js (lightbox)
+		#  	or https://www.paypalobjects.com/js/external/apdg.js (minibrowser)
+		# 	to be added to the page
+		def embedded_url
+			"#{self.base_url}/webapps/adaptivepayment/flow/pay?payKey=#{self[:pay_key]}#{"&preapprovalkey=#{self[:preapproval_key]}" if command == :preapproval}" if webscr?
+		end
+
 		protected
 
 			def symbol_to_key(symbol)
@@ -39,6 +51,28 @@ module Paypal
 				else
 					return Paypal::Api.symbol_to_lower_camel(symbol)
 				end
+			end
+
+			def base_url
+				Paypal::Request.environment == "production" ? "https://www.paypal.com" : "https://www.sandbox.paypal.com"
+			end
+
+		private
+
+			def command_key
+				return command == :preapproval ? "preapprovalkey" : "payKey"
+			end
+
+			def command_value
+				return command == :preapproval ? self[:preapproval_key] : self[:pay_key]
+			end
+
+			def command
+				return self[:preapproval_key] ? :preapproval : :payment
+			end
+
+			def webscr?
+				return true if self[:pay_key] || self[:preapproval_key]
 			end
 	end
 

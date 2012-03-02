@@ -175,9 +175,10 @@ repository. in order to get to that stage, i will need to add support for adapti
 
 # How To Contribute
 
-right now the most help i could use is in writing the signatures for the various api calls from the Payments Pro and Adaptive Payments apis (or any others).
+right now the most help i could use is in writing the signatures for the various api calls from the Payments Pro and
+Adaptive Payments apis (or any others really).
 
-i've tried to make it pretty easy to contribute, signatures are created pretty easily:
+i've tried to make it easy to contribute, signatures are created pretty easily:
 
 ```ruby
 # lib/paypal_api/apis/payments_pro.rb
@@ -276,8 +277,6 @@ by this (including me, sad sad me...).
 note that you need to request that paypal enable mass pay for your account before it will work
 
 * mass_pay - &#10003;
-
-## Instant Pay Notifications
 
 ## Express Checkout
 
